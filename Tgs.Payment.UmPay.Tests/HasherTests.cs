@@ -1,0 +1,74 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
+using NUnit.Framework;
+
+namespace Tgs.Payment.UmPay.Tests
+{
+    [TestFixture]
+    public class HasherTests
+    {
+        [Test]
+        public void Test_Check_Hash()
+        {
+            var merchantNo = "MAJA1628579663";
+            var tradeType = "PAY01";
+            var orderType = 1;
+            var timeStamp = "1628585233";
+            var orderNo = "0123987654";//商戶訂單號 請帶純數字
+            var amount = 100;
+            var tradeDesc = "order123";
+            var notifyUrl = "https://hk.um-pay.com/welcome/callback";
+
+            var dict = new Dictionary<string, object>
+            {
+                { "merchantNo", merchantNo},
+                { "tradeType", tradeType},
+                { "orderType",orderType},
+                { "timeStamp", timeStamp},
+                { "orderNo", orderNo},
+                { "amount" , amount},
+                { "tradeDesc", tradeDesc},
+                { "notifyUrl", notifyUrl}
+            };
+
+            var hasher = new UmPayHasher();
+            var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
+            var actual = hasher.ComputeHash(apiKey, dict);
+
+            var expected = "dea5e91713048526f7fcf1dd1c1ec2e0";
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Max_Guid_To_UnSign_Integer()
+        {
+            var guid = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff");
+            var bigInteger = new BigInteger(
+                guid.ToByteArray(),
+                isUnsigned: true,
+                isBigEndian: false);
+
+            Assert.AreEqual(
+                BigInteger.Parse("340282366920938463463374607431768211455"),
+                bigInteger);
+        }
+
+        [Test]
+        public void Max_Integer_To_Guid()
+        {
+            var numberText = "340282366920938463463374607431768211455";
+
+            var bigInt = BigInteger.Parse(numberText, System.Globalization.NumberStyles.None);
+
+            var expected = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff");
+            //important
+            var buffer = new Span<byte>(new byte[16]);
+            bigInt.ToByteArray().Take(16).ToArray().CopyTo(buffer);
+            var actual = new Guid(buffer);
+
+            Assert.AreEqual(expected, actual);
+        }
+    }
+}

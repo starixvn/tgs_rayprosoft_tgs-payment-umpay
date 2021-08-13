@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "eeziepay.fullname" . }}
+  namespace: {{ .Values.namespace }}
+data:
+  appsettings.json: |
+    {
+      "ConnectionStrings": {
+        "Tgs": "{{ .Values.connectionStrings.tgs }}"
+      },
+      "UmPay": {
+        "PaymentApiUrl": "{{ .Values.paymentApiUrl  }}",
+        "NatsUrl": "{{ .Values.nats }}",
+        "CallbackBaseUrl": "{{ .Values.callbackBaseUrl }}"
+      }
+    }
