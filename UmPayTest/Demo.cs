@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
 using Tgs.Payment.UmPay;
-
 
 namespace UmPayTest
 {
@@ -20,8 +18,8 @@ namespace UmPayTest
         public Demo(IPaymentClient paymentClient, UmPaySerializer umPaySerializer, ILogger<Demo> logger)
         {
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-            _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));            
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));            
+            _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,7 +27,7 @@ namespace UmPayTest
             var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
             var merchantNo = "MAJA1628579663";
             var orderType = "1";
-            var orderNo = new BigInteger(Guid.NewGuid().ToByteArray(), isUnsigned: true, isBigEndian: false);
+            var orderNo = Guid.NewGuid();
             var amount = 100;
             var tradeType = "PAY01";
             var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
@@ -40,7 +38,7 @@ namespace UmPayTest
                 merchantNo,
                 tradeType,
                 orderType,
-                orderNo.ToString(),
+                orderNo,
                 amount,
                 rate,
                 tradeDesc
@@ -53,7 +51,7 @@ namespace UmPayTest
                     _umPaySerializer.Serialize(depositSettings));
                 _logger.LogInformation($"Deposit Return:", depositReturn);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogDebug(ex.Message);
             }
