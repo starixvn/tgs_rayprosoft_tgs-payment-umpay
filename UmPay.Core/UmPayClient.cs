@@ -25,7 +25,7 @@ namespace Tgs.Payment.UmPay
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));                        
             _jsonSerializerOptions = optionsAccessor.Value.SystemSerializerOptions;
-            _umPayHasher = _umPayHasher ?? throw new ArgumentNullException(nameof(_umPayHasher));
+            _umPayHasher = umPayHasher ?? throw new ArgumentNullException(nameof(umPayHasher));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 

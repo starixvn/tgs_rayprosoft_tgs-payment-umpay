@@ -29,7 +29,7 @@ namespace UmPayTest
             var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
             var merchantNo = "MAJA1628579663";
             var orderType = "1";
-            var orderNo = new BigInteger(Guid.NewGuid().ToByteArray(), isUnsigned: true, isBigEndian: false);
+            var orderNo = Guid.NewGuid();
             var amount = 100;
             var tradeType = "PAY01";
             var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
@@ -40,7 +40,7 @@ namespace UmPayTest
                 merchantNo,
                 tradeType,
                 orderType,
-                orderNo.ToString(),
+                orderNo,
                 amount,
                 rate,
                 tradeDesc
