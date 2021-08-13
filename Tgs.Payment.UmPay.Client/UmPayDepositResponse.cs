@@ -38,7 +38,7 @@ namespace Tgs.Payment.UmPay
         /// 訂單金額
         /// </summary>
         [JsonPropertyName("amount")]
-        public decimal? Amount { get; set; }
+        public string? Amount { get; set; }
 
         /// <summary>
         /// 跳轉表單html

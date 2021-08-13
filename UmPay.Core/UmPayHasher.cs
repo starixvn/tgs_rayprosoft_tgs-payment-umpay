@@ -26,7 +26,11 @@ namespace Tgs.Payment.UmPay
                 "",
                 dict.Select(p =>
                 {
-                    return $"{p.Key}{p.Value}";
+                    if (p.Key == "sign"
+                        || (p.Key == "rate" && p.Value.ToString() == "1"))
+                        return "";
+                    else
+                        return $"{p.Key}{p.Value}";
                 }));
 
             var plainText = $"{content}";

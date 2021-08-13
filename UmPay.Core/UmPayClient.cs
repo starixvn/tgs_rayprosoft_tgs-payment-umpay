@@ -23,7 +23,7 @@ namespace Tgs.Payment.UmPay
             UmPayHasher umPayHasher,
             ILogger<UmPayClient> logger)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));                        
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _jsonSerializerOptions = optionsAccessor.Value.SystemSerializerOptions;
             _umPayHasher = umPayHasher ?? throw new ArgumentNullException(nameof(umPayHasher));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -35,14 +35,9 @@ namespace Tgs.Payment.UmPay
             var orderDict = JsonSerializer
                 .Deserialize<Dictionary<string, object>>(orderJson, _jsonSerializerOptions)!;
 
-            //var orderJson = JsonSerializer.Serialize(order, _jsonSerializerOptions);
-            //var orderDict = JsonSerializer
-            //    .Deserialize<Dictionary<string, object>>(orderJson, _jsonSerializerOptions)!
-            //    .AsEnumerable()
-            //    .Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value?.ToString()));
             var sign = _umPayHasher.ComputeHash(apiKey, orderDict);
 
-            order.Sign = sign;
+            orderDict["sign"] = sign;
 
             var paramDict = orderDict
                 .AsEnumerable()
