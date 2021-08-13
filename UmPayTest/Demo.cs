@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
 using Tgs.Payment.UmPay;
-
 
 namespace UmPayTest
 {
@@ -20,8 +18,8 @@ namespace UmPayTest
         public Demo(IPaymentClient paymentClient, UmPaySerializer umPaySerializer, ILogger<Demo> logger)
         {
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-            _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));            
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));            
+            _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -53,7 +51,7 @@ namespace UmPayTest
                     _umPaySerializer.Serialize(depositSettings));
                 _logger.LogInformation($"Deposit Return:", depositReturn);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogDebug(ex.Message);
             }

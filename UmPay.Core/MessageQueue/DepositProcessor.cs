@@ -88,6 +88,6 @@ namespace Tgs.Payment.UmPay.MessageQueue
 
                 return msg.ToByteArray();
             }
-        }        
+        }
     }
 }
