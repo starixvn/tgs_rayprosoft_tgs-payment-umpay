@@ -6,12 +6,12 @@ namespace Tgs.Payment.UmPay
     public class UmPayQueryExchangeRateResponse
     {
         [JsonPropertyName("code")]
-        public string Code { get; set; }
+        public string Code { get; set; } = default!;
 
         [JsonPropertyName("msg")]
-        public string Msg { get; set; }
+        public string Msg { get; set; } = default!;
 
         [JsonPropertyName("rate")]
-        public JsonDocument Rate { get; set; }
+        public JsonDocument? Rate { get; set; }
     }
 }

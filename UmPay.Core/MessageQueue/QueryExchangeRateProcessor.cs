@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
@@ -30,24 +31,42 @@ namespace Tgs.Payment.UmPay.MessageQueue
         public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
         {
             var request = GeneralRequest.Parser.ParseFrom(data);
-            var settings = _umPaySerializer.Deserialize<UmPayQueryExchangeRateSettings>(request.Content);
+            var settings = _umPaySerializer.Deserialize<UmPayQueryExchangeRateSettings>(request.Content)!;
 
             var result = await _payClient
                 .QueryExchangeRateAsync()
                 .ConfigureAwait(false);
 
-            if (result.Code == "1")
+            if (result != null && result.Code == "1")
             {
-                //var response = new UmPayQueryExchangeRateResponse();
-                //var msg = new GeneralResponse()
-                //{
-                //    Result = _umPaySerializer.Serialize(applyInfo)
-                //};
+                var response = new UmPayQueryExchangeRateResponse()
+                {
+                    Code = result.Code,
+                    Msg = result.Msg,
+                    Rate = result.Rate
+                };
 
-                //return msg.ToByteArray();
-                return new byte[1];
+                var applyInfo = new UmPayQueryExchangeRateApplyInfo(settings, response);
+                var msg = new GeneralResponse()
+                {
+                    Result = _umPaySerializer.Serialize(applyInfo)
+                };
+
+                return msg.ToByteArray();
             }
-            return new byte[1];
+            else
+            {
+                var response = new UmPayQueryExchangeRateResponse();
+
+                var applyInfo = new UmPayQueryExchangeRateApplyInfo(settings, response);
+
+                var msg = new GeneralResponse()
+                {
+                    Result = _umPaySerializer.Serialize(applyInfo)
+                };
+
+                return msg.ToByteArray();
+            }
         }
     }
 }
