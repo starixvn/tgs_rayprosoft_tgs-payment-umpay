@@ -64,14 +64,14 @@ namespace Tgs.Payment.UmPay
             return apiResponseData;
         }
 
-        public async ValueTask<UmPayQueryExchangeRateResponse> QueryExchangeRateAsync(QueryExchangeRateOrder order)
+        public async ValueTask<UmPayQueryExchangeRateResponse> QueryExchangeRateAsync()
         {
-            var requestContent = new StringContent(JsonSerializer.Serialize(order, _jsonSerializerOptions));
+            var requestContent = new StringContent("");
 
             requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
 
             var response = await _httpClient
-                .PostAsync("/get_rate", requestContent)
+                .GetAsync("/get_rate")
                 .ConfigureAwait(false);
 
             _logger.LogInformation($"ExchangeRate StatusCode: {response.StatusCode}");

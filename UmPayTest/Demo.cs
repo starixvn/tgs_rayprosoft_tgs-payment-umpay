@@ -70,7 +70,7 @@ namespace UmPayTest
                 .AskAsync("tgs.payment.umpay.queryexchangerate",
                 _umPaySerializer.Serialize(exchangeRateSettings));
 
-            _logger.LogInformation("ExchangeRate Return:");
+            _logger.LogInformation("ExchangeRate Return:", queryExchangeRateReturn);
         }
     }
 }

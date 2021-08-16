@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -36,16 +33,16 @@ namespace Tgs.Payment.UmPay.MessageQueue
             var settings = _umPaySerializer.Deserialize<UmPayDepositSettings>(request.Content);
 
             var result = await _payClient
-                .QueryExchangeRateAsync(new QueryExchangeRateOrder())
+                .QueryExchangeRateAsync()
                 .ConfigureAwait(false);
 
-            if(result.Code == "1")
+            if (result.Code == "1")
             {
                 //var response = new UmPayQueryExchangeRateResponse();
                 //var msg = new GeneralResponse()
                 //{
                 //    Result = _umPaySerializer.Serialize(applyInfo)
-                //}
+                //};
 
                 //return msg.ToByteArray();
                 return new byte[1];
