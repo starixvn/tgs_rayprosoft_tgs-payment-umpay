@@ -50,6 +50,7 @@ namespace Tgs.Payment.UmPay.MessageQueue
                 //return msg.ToByteArray();
                 return new byte[1];
             }
+            return new byte[1];
         }
     }
 }
