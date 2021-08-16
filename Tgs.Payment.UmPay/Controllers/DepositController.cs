@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Tgs.Payment.UmPay.Services;
@@ -23,13 +24,18 @@ namespace Tgs.Payment.UmPay.Controllers
         }
 
         [HttpPost("callback")]
-        [Consumes("application/x-www-form-urlencoded")]
+        //[Consumes("application/x-www-form-urlencoded")]
         public async Task<string> DepositCallback(
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SaveDepositReturnCommand> saveReturnService,
             [FromServices] ICommandService<ApproveDepositFormCommand> approveService,
-            [FromForm] CallbackDepositViewModel request)
+            [FromForm] CallbackDepositViewModel request,
+            [FromForm] IFormCollection formCollection)
         {
+            foreach (var item in formCollection)
+            {
+                Console.WriteLine($"{item.Key}:{item.Value}");
+            }
             var depositForm = await getDepositFormService
                 .GetAsync(new GetDepositFormQuery(request.OrderNo))
                 .ConfigureAwait(false);

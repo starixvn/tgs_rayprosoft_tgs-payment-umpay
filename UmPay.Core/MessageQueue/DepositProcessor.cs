@@ -40,7 +40,7 @@ namespace Tgs.Payment.UmPay.MessageQueue
                 //不影響用戶付款時間
                 TimeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString(),
                 //訂單號需純數字
-                OrderNo = new BigInteger(settings.OrderNo.ToByteArray()).ToString(),
+                OrderNo = new BigInteger(settings.OrderNo.ToByteArray(), isUnsigned: true, isBigEndian: false).ToString(),
                 Amount = decimal.Parse(request.Amount),
                 Rate = cryptoTradeTypes.Contains(settings.TradeType) ? settings.Rate : 1,
                 TradeDesc = settings.TradeDesc,
