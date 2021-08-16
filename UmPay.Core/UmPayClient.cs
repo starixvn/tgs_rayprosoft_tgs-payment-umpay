@@ -70,7 +70,7 @@ namespace Tgs.Payment.UmPay
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri("/get_rate"),
+                RequestUri = new Uri("https://hk-dev.um-pay.com/umpay/get_rate"),
                 Content = new StringContent("some json", Encoding.UTF8, MediaTypeNames.Application.Json),
             };
 
