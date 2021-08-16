@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Mime;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -66,12 +67,15 @@ namespace Tgs.Payment.UmPay
 
         public async ValueTask<UmPayQueryExchangeRateResponse> QueryExchangeRateAsync()
         {
-            var requestContent = new StringContent("");
-
-            requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("/get_rate"),
+                Content = new StringContent("some json", Encoding.UTF8, MediaTypeNames.Application.Json),
+            };
 
             var response = await _httpClient
-                .GetAsync("/get_rate")
+                .SendAsync(request)
                 .ConfigureAwait(false);
 
             _logger.LogInformation($"ExchangeRate StatusCode: {response.StatusCode}");

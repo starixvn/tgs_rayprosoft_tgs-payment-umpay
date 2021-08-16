@@ -30,7 +30,7 @@ namespace Tgs.Payment.UmPay.MessageQueue
         public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
         {
             var request = GeneralRequest.Parser.ParseFrom(data);
-            var settings = _umPaySerializer.Deserialize<UmPayDepositSettings>(request.Content);
+            var settings = _umPaySerializer.Deserialize<UmPayQueryExchangeRateSettings>(request.Content);
 
             var result = await _payClient
                 .QueryExchangeRateAsync()
