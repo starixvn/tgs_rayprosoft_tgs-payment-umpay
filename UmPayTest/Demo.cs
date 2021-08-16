@@ -24,6 +24,12 @@ namespace UmPayTest
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            //await DepoistAsync();
+            await ExchangeRateAsync();
+        }
+
+        private async Task DepoistAsync()
+        {
             var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
             var merchantNo = "MAJA1628579663";
             var orderType = "1";
@@ -55,6 +61,16 @@ namespace UmPayTest
             {
                 _logger.LogDebug(ex.Message);
             }
+        }
+
+        private async Task ExchangeRateAsync()
+        {
+            var exchangeRateSettings = new UmPayQueryExchangeRateSettings();
+            var queryExchangeRateReturn = await _paymentClient
+                .AskAsync("tgs.payment.umpay.queryexchangerate",
+                _umPaySerializer.Serialize(exchangeRateSettings));
+
+            _logger.LogInformation("ExchangeRate Return:");
         }
     }
 }

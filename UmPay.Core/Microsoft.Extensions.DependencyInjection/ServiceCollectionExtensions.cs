@@ -33,8 +33,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
                             options.Url = applePayOptions.NatsUrl;
                         })
-                        .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit");
-                    //.AddProcessor<WithdrawProcessor>("tgs.payment.applepay.withdraw", "tgs.payment.applepay.withdraw");
+                        .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit")
+                        .AddProcessor<QueryExchangeRateProcessor>("tgs.payment.umpay.queryexchangerate");
                 })
                 .AddPaymentClient();
     }

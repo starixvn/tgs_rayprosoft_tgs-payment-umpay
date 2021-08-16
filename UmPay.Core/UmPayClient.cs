@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -61,6 +62,27 @@ namespace Tgs.Payment.UmPay
             var apiResponseData = JsonSerializer.Deserialize<UmPayDepositResponse>(bodyJson, _jsonSerializerOptions);
 
             return apiResponseData;
+        }
+
+        public async ValueTask<UmPayQueryExchangeRateResponse> QueryExchangeRateAsync(QueryExchangeRateOrder order)
+        {
+            var requestContent = new StringContent(JsonSerializer.Serialize(order, _jsonSerializerOptions));
+
+            requestContent.Headers.ContentType = MediaTypeHeaderValue.Parse(MediaTypeNames.Application.Json);
+
+            var response = await _httpClient
+                .PostAsync("/get_rate", requestContent)
+                .ConfigureAwait(false);
+
+            _logger.LogInformation($"ExchangeRate StatusCode: {response.StatusCode}");
+
+            var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            _logger.LogInformation($"ExchangeRate Body: {bodyJson}");
+
+            var result = JsonSerializer.Deserialize<UmPayQueryExchangeRateResponse>(bodyJson, _jsonSerializerOptions);
+
+            return result!;
         }
     }
 }
