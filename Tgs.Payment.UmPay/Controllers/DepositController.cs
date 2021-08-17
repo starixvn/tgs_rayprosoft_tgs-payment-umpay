@@ -24,7 +24,7 @@ namespace Tgs.Payment.UmPay.Controllers
         }
 
         [HttpPost("callback")]
-        //[Consumes("application/x-www-form-urlencoded")]
+        [Produces("text/plain")]
         public async Task<string> DepositCallback(
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<SaveDepositReturnCommand> saveReturnService,
@@ -37,23 +37,21 @@ namespace Tgs.Payment.UmPay.Controllers
                 Console.WriteLine($"{item.Key}:{item.Value}");
             }
             var depositForm = await getDepositFormService
-                .GetAsync(new GetDepositFormQuery(request.OrderNo))
+                .GetAsync(new GetDepositFormQuery(request.OutTradeNo))
                 .ConfigureAwait(false);
 
             if (depositForm.Status < 1000)
             {
                 var callbackMessage = new UmPayDepositReturn()
                 {
+                    OutTradeNo = request.OutTradeNo,
+                    TradeNo = request.TradeNo,
                     MerchantNo = request.MerchantNo,
-                    TradeType = request.TradeType,
-                    OrderType = request.OrderType,
-                    TimeStamp = request.TimeStamp,
-                    OrderNo = request.OrderNo,
+                    TradeStatus = request.TradeStatus,
                     Amount = request.Amount,
-                    Rate = request.Rate,
-                    TradeDesc = request.TradeDesc,
-                    NotifyUrl = request.NotifyUrl,
-                    Sign = request.Sign
+                    RealAmount = request.RealAmount,
+                    Sign = request.Sign,
+                    Msg = request.Msg
                 };
 
                 await saveReturnService
