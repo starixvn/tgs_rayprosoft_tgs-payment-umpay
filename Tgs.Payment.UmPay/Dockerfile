@@ -7,7 +7,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["nuget.config", "."]
+COPY ["NuGet.config", "."]
 COPY ["Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj", "Tgs.Payment.UmPay/"]
 COPY ["Tgs.Payment.UmPay.Repositories/Tgs.Payment.UmPay.Repositories.csproj", "Tgs.Payment.UmPay.Repositories/"]
 COPY ["UmPay.Core/UmPay.Core.csproj", "UmPay.Core/"]
