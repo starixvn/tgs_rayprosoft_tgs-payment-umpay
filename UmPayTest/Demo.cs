@@ -24,8 +24,8 @@ namespace UmPayTest
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //await DepoistAsync();
-            await ExchangeRateAsync();
+            await DepoistAsync();
+            //await ExchangeRateAsync();
         }
 
         private async Task DepoistAsync()
@@ -35,7 +35,7 @@ namespace UmPayTest
             var orderType = "1";
             var orderNo = Guid.NewGuid();
             var amount = 100;
-            var tradeType = "PAY01";
+            var tradeType = "PAY12";
             var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
             var rate = cryptoTradeTypes.Contains(tradeType) ? 7.8m : 1;//TODO:加密需要給rate
             var tradeDesc = "order123";
