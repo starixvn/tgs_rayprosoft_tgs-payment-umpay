@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollecitonExtensions
     {
-        public static IServiceCollection AddApplePayRepositories(
+        public static IServiceCollection AddUmPayRepositories(
             this IServiceCollection services,
             Action<IServiceProvider, DbContextOptionsBuilder> configure,
             int poolSize = 128)

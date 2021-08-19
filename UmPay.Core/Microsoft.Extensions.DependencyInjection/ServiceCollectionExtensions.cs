@@ -29,9 +29,9 @@ namespace Microsoft.Extensions.DependencyInjection
                     config
                         .ConfigQueueOptions((options, sp) =>
                         {
-                            var applePayOptions = sp.GetRequiredService<IOptions<UmPayOptions>>().Value;
+                            var umPayOptions = sp.GetRequiredService<IOptions<UmPayOptions>>().Value;
 
-                            options.Url = applePayOptions.NatsUrl;
+                            options.Url = umPayOptions.NatsUrl;
                         })
                         .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit")
                         .AddProcessor<QueryExchangeRateProcessor>("tgs.payment.umpay.queryexchangerate");

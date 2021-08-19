@@ -52,7 +52,7 @@ namespace Tgs.Payment.UmPay
                .AddSingleton<UmPaySerializer>();
 
             services
-               .AddApplePayRepositories((sp, builder) =>
+               .AddUmPayRepositories((sp, builder) =>
                {
                    var config = sp.GetRequiredService<IConfiguration>();
 
