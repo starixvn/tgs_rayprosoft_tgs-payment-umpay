@@ -15,14 +15,14 @@ pipeline {
 				script {
 					switch(env.GIT_BRANCH)
                     {
-                        case ['main', 'origin/main']:
-                            env.kube_ns = "prod";
-                            env.k8s_config = 'stag-k8s-config';
-                            break;
-                        case ['release', 'origin/release']:
-                            env.kube_ns = "staging";
-                            env.k8s_config = 'stag-k8s-config';
-                            break;
+                        // case ['main', 'origin/main']:
+                        //     env.kube_ns = "prod";
+                        //     env.k8s_config = 'stag-k8s-config';
+                        //     break;
+                        // case ['release', 'origin/release']:
+                        //     env.kube_ns = "staging";
+                        //     env.k8s_config = 'stag-k8s-config';
+                        //     break;
                         default:
                             env.kube_ns = "dev";
                             env.k8s_config = 'k8s-kube-config' 
