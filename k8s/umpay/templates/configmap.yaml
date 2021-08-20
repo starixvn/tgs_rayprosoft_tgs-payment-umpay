@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: configmap-{{ include "eeziepay.fullname" . }}
+  name: configmap-{{ include "umpay.fullname" . }}
   namespace: {{ .Values.namespace }}
 data:
   appsettings.json: |
