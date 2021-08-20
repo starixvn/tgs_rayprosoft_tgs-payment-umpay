@@ -63,6 +63,12 @@ pipeline {
 		}
 		
 		stage('Push packages') {
+			when {
+                expression {
+                    return env.kube_ns == 'dev';
+                }
+            }
+
 			steps {
 				sh 'dotnet pack -c $BuildConfiguration "Tgs.Payment.UmPay.Client/Tgs.Payment.UmPay.Client.csproj" --no-build'
 				sh 'dotnet nuget push "Tgs.Payment.UmPay.Client/bin/$BuildConfiguration/*.nupkg" --source "raypro" --skip-duplicate'
