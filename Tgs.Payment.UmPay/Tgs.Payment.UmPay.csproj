@@ -19,8 +19,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Tgs.Payment.UmPay.Repositories\Tgs.Payment.UmPay.Repositories.csproj" />
 		<ProjectReference Include="..\UmPay.Core\UmPay.Core.csproj" />
-	</ItemGroup>
-
-	<ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+	</ItemGroup>	
 
 </Project>
