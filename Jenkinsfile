@@ -15,14 +15,14 @@ pipeline {
 				script {
 					switch(env.GIT_BRANCH)
                     {
-                        // case ['main', 'origin/main']:
-                        //     env.kube_ns = "prod";
-                        //     env.k8s_config = 'stag-k8s-config';
-                        //     break;
-                        // case ['release', 'origin/release']:
-                        //     env.kube_ns = "staging";
-                        //     env.k8s_config = 'stag-k8s-config';
-                        //     break;
+                        case ['main', 'origin/main']:
+                            env.kube_ns = "prod";
+                            env.k8s_config = 'stag-k8s-config';
+                            break;
+                        case ['release', 'origin/release']:
+                            env.kube_ns = "staging";
+                            env.k8s_config = 'stag-k8s-config';
+                            break;
                         default:
                             env.kube_ns = "dev";
                             env.k8s_config = 'k8s-kube-config' 
@@ -93,20 +93,20 @@ pipeline {
                     sh '''
 						helm template k8s/umpay \
 							--set image.tag=v${TAG} \
-							--set namespace=dev \
-							--set "connectionStrings.tgs=${TGS}" \
-							--set paymentApiUrl=${PaymentApiUrl} \
-							--set nats=${NatsUri} \
-							--set callbackBaseUrl=${CallbackUrl}
+							--set namespace=$kube_ns \
+							--set connectionStrings.tgs="$tgs_tgs" \
+							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
+							--set nats="$NatsUri" \
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl"
 					'''
 					sh '''
 						helm template k8s/umpay \
 							--set image.tag=v${TAG} \
-							--set namespace=dev \
-							--set "connectionStrings.tgs=${TGS}" \
-							--set paymentApiUrl=${PaymentApiUrl} \
-							--set nats=${NatsUri} \
-							--set callbackBaseUrl=${CallbackUrl} | kubectl -n dev apply -f -
+							--set namespace=$kube_ns \
+							--set connectionStrings.tgs="$tgs_tgs" \
+							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
+							--set nats="$NatsUri" \
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl" | kubectl -n dev apply -f -
 					'''
                 }
 			}
