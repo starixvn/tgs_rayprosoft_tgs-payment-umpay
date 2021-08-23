@@ -19,6 +19,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Tgs.Payment.UmPay.Repositories\Tgs.Payment.UmPay.Repositories.csproj" />
 		<ProjectReference Include="..\UmPay.Core\UmPay.Core.csproj" />
-	</ItemGroup>
+	</ItemGroup>	
 
 </Project>
