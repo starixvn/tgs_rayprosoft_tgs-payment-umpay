@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 
 namespace Tgs.Payment.UmPay
@@ -82,7 +83,11 @@ namespace Tgs.Payment.UmPay
                 builder
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddProfileViewExporter();
+                    .AddProfileViewExporter(builder =>
+                    {
+                        builder
+                            .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg"));
+                    });
             });
 
             services.AddProfileViewer();
