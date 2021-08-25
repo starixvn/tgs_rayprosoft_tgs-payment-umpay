@@ -6,7 +6,7 @@ pipeline {
 		BuildConfiguration = "Debug"
 		ImageName = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/umpay"
 		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"
-		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2154485/tags"
+		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2214579/tags"
 	}
 	stages {
 		stage('Prepare'){
@@ -44,6 +44,8 @@ pipeline {
                         message += "\nBranch: ${env.GIT_BRANCH}" 
                         message += "\nTag: ${env.TAG}"
                         message += "\nEnv: ${env.kube_ns}"
+                        env.commit_url = "${env.GIT_URL}".replace(".git","/-/commit/") + "${env.GIT_COMMIT}"
+                        message += "\n Commit: ${env.commit_url}"
                     }
 				}
                 sh "echo tag: $TAG"
@@ -93,20 +95,20 @@ pipeline {
                     sh '''
 						helm template k8s/umpay \
 							--set image.tag=v${TAG} \
-							--set namespace=dev \
-							--set "connectionStrings.tgs=${TGS}" \
-							--set paymentApiUrl=${PaymentApiUrl} \
-							--set nats=${NatsUri} \
-							--set callbackBaseUrl=${CallbackUrl}
+							--set namespace=$kube_ns \
+							--set connectionStrings.tgs="$tgs_tgs" \
+							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
+							--set nats="$tgs_nats" \
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay"
 					'''
 					sh '''
 						helm template k8s/umpay \
 							--set image.tag=v${TAG} \
-							--set namespace=dev \
-							--set "connectionStrings.tgs=${TGS}" \
-							--set paymentApiUrl=${PaymentApiUrl} \
-							--set nats=${NatsUri} \
-							--set callbackBaseUrl=${CallbackUrl} | kubectl -n dev apply -f -
+							--set namespace=$kube_ns \
+							--set connectionStrings.tgs="$tgs_tgs" \
+							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
+							--set nats="$tgs_nats" \
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" | kubectl -n dev apply -f -
 					'''
                 }
 			}
@@ -146,4 +148,18 @@ pipeline {
             sendTelegram("<b>Failed Pipeline:</b> ${currentBuild.fullDisplayName} Something is wrong with ${env.BUILD_URL}/console\n${currentBuild.getBuildCauses()[0].shortDescription}\n")
         }		
 	}
+}
+
+def sendTelegram(message) {
+    def encodedMessage = URLEncoder.encode(message, "UTF-8")
+
+    withCredentials([string(credentialsId: "telegramToken", variable: "TOKEN"), string(credentialsId: "telegramChatId", variable: "CHAT_ID")]) {
+
+        response = httpRequest (consoleLogResponseBody: true,
+                contentType: 'APPLICATION_JSON',
+                httpMode: 'GET',
+                url: "https://api.telegram.org/bot${TOKEN}/sendMessage?text=${encodedMessage}&chat_id=${CHAT_ID}",
+                validResponseCodes: '200')
+        return response
+    }
 }
