@@ -77,6 +77,7 @@ namespace Tgs.Payment.UmPay.Controllers
                     .ConfigureAwait(false);
             }
 
+            _logger.LogInformation("callback executed");
             return "success";
         }
     }
