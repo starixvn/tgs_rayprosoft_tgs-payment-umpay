@@ -6,7 +6,7 @@ pipeline {
 		BuildConfiguration = "Debug"
 		ImageName = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/umpay"
 		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"
-		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2154485/tags"
+		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2214579/tags"
 	}
 	stages {
 		stage('Prepare'){
@@ -44,6 +44,8 @@ pipeline {
                         message += "\nBranch: ${env.GIT_BRANCH}" 
                         message += "\nTag: ${env.TAG}"
                         message += "\nEnv: ${env.kube_ns}"
+                        env.commit_url = "${env.GIT_URL}".replace(".git","/-/commit/") + "${env.GIT_COMMIT}"
+                        message += "\n Commit: ${env.commit_url}"
                     }
 				}
                 sh "echo tag: $TAG"
