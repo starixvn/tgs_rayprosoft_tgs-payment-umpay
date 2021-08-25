@@ -99,7 +99,7 @@ pipeline {
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl"
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay"
 					'''
 					sh '''
 						helm template k8s/umpay \
@@ -108,7 +108,7 @@ pipeline {
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl" | kubectl -n dev apply -f -
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" | kubectl -n dev apply -f -
 					'''
                 }
 			}
