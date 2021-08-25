@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -32,10 +33,15 @@ namespace Tgs.Payment.UmPay.Controllers
             [FromForm] CallbackDepositViewModel request,
             [FromForm] IFormCollection formCollection)
         {
-            foreach (var item in formCollection)
+            if (_logger.IsEnabled(LogLevel.Information))
             {
-                Console.WriteLine($"{item.Key}:{item.Value}");
+                var formData = string.Join(", ", formCollection.Select(item => $"{item.Key}:{item.Value}"));
+
+                _logger.LogInformation(
+                    $"Callback execute, request: " +
+                    $"{formData}");
             }
+
             var depositForm = await getDepositFormService
                 .GetAsync(new GetDepositFormQuery(request.OutTradeNo))
                 .ConfigureAwait(false);
