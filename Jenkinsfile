@@ -108,7 +108,7 @@ pipeline {
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" | kubectl -n dev apply -f -
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" | kubectl -n $kube_ns apply -f -
 					'''
                 }
 			}
