@@ -13,6 +13,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+		<PackageReference Include="OpenTelemetry" Version="1.1.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc7" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc7" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc7" />
+		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.0.9-beta" />
 		<PackageReference Include="Tgs.Logging" Version="0.0.8" />
 	</ItemGroup>
 

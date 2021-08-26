@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Trace;
 
 namespace Tgs.Payment.UmPay
 {
@@ -31,6 +33,7 @@ namespace Tgs.Payment.UmPay
                 {
                     await context.Response.WriteAsync("Hello World!");
                 });
+                endpoints.MapProfileViewer();
             });
         }
 
@@ -67,12 +70,27 @@ namespace Tgs.Payment.UmPay
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 });
+
             services.AddTransient(sp =>
             {
                 var options = sp.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions;
 
                 return options;
             });
+
+            services.AddOpenTelemetryTracing(builder =>
+            {
+                builder
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddProfileViewExporter(builder =>
+                    {
+                        builder
+                            .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg"));
+                    });
+            });
+
+            services.AddProfileViewer();
         }
     }
 }
