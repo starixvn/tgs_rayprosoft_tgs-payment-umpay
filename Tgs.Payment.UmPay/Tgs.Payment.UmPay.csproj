@@ -1,24 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  <Nullable>enable</Nullable>
-    <UserSecretsId>37d10ff6-10c6-469c-abd2-0c42d4c2e0d6</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-  <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
-    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
-    <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
-    <DockerfileTag Condition="$(DockerfileTag) == ''">payment/umpay</DockerfileTag>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+	<Nullable>enable</Nullable>
+		<UserSecretsId>37d10ff6-10c6-469c-abd2-0c42d4c2e0d6</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
+		<GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+		<DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
+		<DockerfileTag Condition="$(DockerfileTag) == ''">payment/umpay</DockerfileTag>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
-    <PackageReference Include="Tgs.Logging" Version="0.0.8" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+		<PackageReference Include="OpenTelemetry" Version="1.1.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc7" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc7" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc7" />
+		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.0.9-beta" />
+		<PackageReference Include="Tgs.Logging" Version="0.0.8" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Tgs.Payment.UmPay.Repositories\Tgs.Payment.UmPay.Repositories.csproj" />
-    <ProjectReference Include="..\UmPay.Core\UmPay.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Tgs.Payment.UmPay.Repositories\Tgs.Payment.UmPay.Repositories.csproj" />
+		<ProjectReference Include="..\UmPay.Core\UmPay.Core.csproj" />
+	</ItemGroup>	
 
 </Project>
