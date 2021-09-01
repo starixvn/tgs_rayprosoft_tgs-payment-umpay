@@ -88,6 +88,19 @@ pipeline {
 				sh 'sudo docker push $ImageName:v${TAG}'
 			}
 		}
+		
+		stage('Deploy'){
+			when {
+                expression {
+                    return env.kube_ns == 'prod';
+                }
+            }
+			script {
+                    input message: 'Ready to go?', ok: 'yes';
+                }
+                
+                sh "echo start deploy"
+		}
 
 		stage('Deploy umpay') {			
 			steps {
