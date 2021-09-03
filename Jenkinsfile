@@ -7,7 +7,7 @@ pipeline {
 		BuildConfiguration = "Debug"
 		ImageName = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/payment-umpay"
 		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"
-		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2214579/tags"
+		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2254533/tags"
 	}
 	stages {
 		stage('Prepare'){
