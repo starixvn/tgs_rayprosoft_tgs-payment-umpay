@@ -13,6 +13,7 @@ pipeline {
 		stage('Prepare'){
 			steps {
 				sh "echo 'Branch: $GIT_BRANCH'";
+                sh "printenv";
 				script {
 					switch(env.GIT_BRANCH)
                     {
