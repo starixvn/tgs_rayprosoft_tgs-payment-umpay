@@ -31,6 +31,13 @@ namespace Tgs.Payment.UmPay.MessageQueue
             var request = DepositRequest.Parser.ParseFrom(data);
             var settings = _umPaySerializer.Deserialize<UmPayDepositSettings>(request.ApplyInfo)!;
             var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
+            var randomPointTradeTypes = new string[] { "PAY01", "PAY03", "PAY04" };
+
+            var amount = decimal.Parse(request.Amount);
+            if (randomPointTradeTypes.Contains(settings.TradeType))
+            {
+                amount = decimal.Parse((request.Amount + "." + new Random().Next(0, 99).ToString()));
+            }
 
             var order = new DepositOrder
             {
@@ -41,7 +48,7 @@ namespace Tgs.Payment.UmPay.MessageQueue
                 TimeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString(),
                 //訂單號需純數字
                 OrderNo = new BigInteger(settings.OrderNo.ToByteArray(), isUnsigned: true, isBigEndian: false).ToString(),
-                Amount = decimal.Parse(request.Amount),
+                Amount = amount,
                 Rate = cryptoTradeTypes.Contains(settings.TradeType) ? settings.Rate : 1,
                 TradeDesc = settings.TradeDesc,
                 NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback"
