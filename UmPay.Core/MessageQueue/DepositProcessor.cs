@@ -15,6 +15,7 @@ namespace Tgs.Payment.UmPay.MessageQueue
         private readonly UmPaySerializer _umPaySerializer;
         private readonly UmPayClient _umPayClient;
         private readonly UmPayOptions _options;
+        private static Random _Random = new Random();
 
         public DepositProcessor(
             UmPaySerializer umPaySerializer,
@@ -36,7 +37,8 @@ namespace Tgs.Payment.UmPay.MessageQueue
             var amount = decimal.Parse(request.Amount);
             if (randomPointTradeTypes.Contains(settings.TradeType))
             {
-                amount = decimal.Parse((request.Amount + "." + new Random().Next(0, 99).ToString()));
+                //需要隨機兩位小數的通道類型:PAY01支轉支 PAY03轉數快 PAY04網銀
+                amount += _Random.Next(1, 100) / 100M;
             }
 
             var order = new DepositOrder
