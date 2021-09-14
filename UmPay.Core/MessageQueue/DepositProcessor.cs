@@ -15,7 +15,6 @@ namespace Tgs.Payment.UmPay.MessageQueue
         private readonly UmPaySerializer _umPaySerializer;
         private readonly UmPayClient _umPayClient;
         private readonly UmPayOptions _options;
-        private static Random _Random = new Random();
 
         public DepositProcessor(
             UmPaySerializer umPaySerializer,
@@ -32,14 +31,6 @@ namespace Tgs.Payment.UmPay.MessageQueue
             var request = DepositRequest.Parser.ParseFrom(data);
             var settings = _umPaySerializer.Deserialize<UmPayDepositSettings>(request.ApplyInfo)!;
             var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
-            var randomPointTradeTypes = new string[] { "PAY01", "PAY03", "PAY04" };
-
-            var amount = decimal.Parse(request.Amount);
-            if (randomPointTradeTypes.Contains(settings.TradeType))
-            {
-                //需要隨機兩位小數的通道類型:PAY01支轉支 PAY03轉數快 PAY04網銀
-                amount += _Random.Next(1, 100) / 100M;
-            }
 
             var order = new DepositOrder
             {
@@ -50,7 +41,7 @@ namespace Tgs.Payment.UmPay.MessageQueue
                 TimeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString(),
                 //訂單號需純數字
                 OrderNo = new BigInteger(settings.OrderNo.ToByteArray(), isUnsigned: true, isBigEndian: false).ToString(),
-                Amount = amount,
+                Amount = decimal.Parse(request.Amount),
                 Rate = cryptoTradeTypes.Contains(settings.TradeType) ? settings.Rate : 1,
                 TradeDesc = settings.TradeDesc,
                 NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback"
