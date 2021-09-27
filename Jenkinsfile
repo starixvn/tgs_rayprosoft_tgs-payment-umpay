@@ -1,17 +1,19 @@
 def message = "";
+
 pipeline {
 	agent any
 
 	environment {
 		BuildConfiguration = "Debug"
-		ImageName = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/umpay"
+		ImageName = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/payment-umpay"
 		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"
-		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2214579/tags"
+		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2254533/tags"
 	}
 	stages {
 		stage('Prepare'){
 			steps {
 				sh "echo 'Branch: $GIT_BRANCH'";
+                sh "printenv";
 				script {
 					switch(env.GIT_BRANCH)
                     {
@@ -40,11 +42,12 @@ pipeline {
                             env."tgs_${key}" = value;
                         }
 
-                        env.TAG = env.kube_ns + '-' + sh(script: "echo `date +%Y%m%d%H%M`", returnStdout: true).trim()
+                        env.TAG = sh(script: "echo `date +%Y%m%d%H%M`", returnStdout: true).trim() + '-' + env.kube_ns
                         message += "\nBranch: ${env.GIT_BRANCH}" 
                         message += "\nTag: ${env.TAG}"
                         message += "\nEnv: ${env.kube_ns}"
-                        env.commit_url = "${env.GIT_URL}".replace(".git","/-/commit/") + "${env.GIT_COMMIT}"
+                        env.commit_url = "${env.GIT_URL}".replace("git@gitlab.com:","https://gitlab.com/")
+                            .replace(".git","/-/commit/") + "${env.GIT_COMMIT}"
                         message += "\n Commit: ${env.commit_url}"
                     }
 				}
@@ -79,22 +82,38 @@ pipeline {
 
 		stage('Build Docker Image') {
 			steps {
-				sh 'dotnet build "Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:v${TAG}" --no-restore '
+				sh 'dotnet build "Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
 			}
 		}
 
 		stage('Push Docker Image') {
 			steps {
-				sh 'sudo docker push $ImageName:v${TAG}'
+				sh 'sudo docker push $ImageName:${TAG}'
 			}
 		}
 
-		stage('Deploy umpay') {			
+		stage('Deploy') {
+            when {
+                expression {
+                    return env.kube_ns == 'prod';
+                }
+            }
+
+            steps {
+                script {
+                    input message: 'Ready to go?', ok: 'yes';
+                }
+                
+                sh "echo start deploy"
+            }
+        }
+
+		stage('Deploy to k8s') {			
 			steps {
 				withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
-						helm template k8s/umpay \
-							--set image.tag=v${TAG} \
+						helm template deployment/k8s/umpay \
+							--set image.tag=${TAG} \
 							--set namespace=$kube_ns \
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
@@ -102,13 +121,14 @@ pipeline {
 							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay"
 					'''
 					sh '''
-						helm template k8s/umpay \
-							--set image.tag=v${TAG} \
+						helm template deployment/k8s/umpay \
+							--set image.tag=${TAG} \
 							--set namespace=$kube_ns \
 							--set connectionStrings.tgs="$tgs_tgs" \
 							--set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
 							--set nats="$tgs_nats" \
-							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" | kubectl -n $kube_ns apply -f -
+							--set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
+						| kubectl -n $kube_ns apply -f -
 					'''
                 }
 			}
