@@ -37,7 +37,7 @@ namespace Tgs.Payment.UmPay.Repositories
                 .ConfigureAwait(false);
 
             form.Status = 1000;
-            form.ActualAmount = depositReturn.Amount;
+            form.ActualAmount = depositReturn.RealAmount;
             form.PaymentReturn = _serializer.Serialize(depositReturn);
 
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
