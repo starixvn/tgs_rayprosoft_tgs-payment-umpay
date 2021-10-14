@@ -6,12 +6,10 @@ metadata:
 data:
   appsettings.json: |
     {
-      "ConnectionStrings": {
-        "Tgs": "{{ .Values.connectionStrings.tgs }}"
-      },
       "UmPay": {
         "PaymentApiUrl": "{{ .Values.paymentApiUrl  }}",
         "NatsUrl": "{{ .Values.nats }}",
-        "CallbackBaseUrl": "{{ .Values.callbackBaseUrl }}"
+        "CallbackBaseUrl": "{{ .Values.callbackBaseUrl }}",
+        "PaymentServiceBaseUrl": "{{ .Values.paymentServiceBaseUrl  }}"
       }
     }

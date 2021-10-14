@@ -73,11 +73,15 @@ namespace Tgs.Payment.UmPay.Controllers
                 _logger.LogInformation(JsonSerializer.Serialize(callbackMessage, jsonSerializerOptions));
 
                 await approveService
-                    .ExecuteAsync(new ApproveDepositFormCommand(depositForm.Id, depositForm.BrandId))
+                    .ExecuteAsync(new ApproveDepositFormCommand(
+                        depositForm.Id,
+                        depositForm.BrandId,
+                        callbackMessage.RealAmount))
                     .ConfigureAwait(false);
             }
 
             _logger.LogInformation("callback executed");
+
             return "success";
         }
     }
