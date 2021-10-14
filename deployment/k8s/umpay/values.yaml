@@ -23,7 +23,8 @@ connectionStrings:
 nats: nats://localhost:4222
 
 paymentApiUrl: https://hk-dev.um-pay.com/umpay
-callbackBaseUrl: https://dev.payment.tgsdev.gq/um-test
+callbackBaseUrl: https://dev-payment.rpgp.cc/umpay
+paymentServiceBaseUrl: http://payment-api
 
 podAnnotations: {}
 
@@ -53,6 +54,14 @@ resources:
   requests:
     cpu: 400m
     memory: 1Gi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
 
 nodeSelector: {}
 
