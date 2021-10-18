@@ -31,11 +31,7 @@ namespace Tgs.Payment.UmPay.Controllers
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ICommandService<CheckSigningCodeCommand> checkSigningCodeService,
             [FromServices] ICommandService<SaveDepositReturnCommand> saveReturnService,
-            [FromServices] ICommandService<ApproveDepositFormCommand> approveService
-            //[FromForm] Dictionary<string,object> response)
-            //[FromForm] CallbackDepositViewModel response)
-            //[FromForm] IFormCollection formCollection)
-            )
+            [FromServices] ICommandService<ApproveDepositFormCommand> approveService)
         {
             var form = Request.Form.Keys.ToDictionary(k => k, v => Request.Form[v].ToString());
             var json = JsonSerializer.Serialize(form);
