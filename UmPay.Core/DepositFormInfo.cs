@@ -1,4 +1,5 @@
 ﻿using System;
+using Tgs.Payment.Clients;
 
 namespace Tgs.Payment.UmPay
 {
@@ -8,7 +9,7 @@ namespace Tgs.Payment.UmPay
        Guid BrandId,
        Guid BrandPaymentId,
        decimal Amount,
-       int Status,
+       PaymentFlowState Status,
        UmPayDepositApplyInfo? ApplyInfo,
        string? PaymentReturn = null);
 }

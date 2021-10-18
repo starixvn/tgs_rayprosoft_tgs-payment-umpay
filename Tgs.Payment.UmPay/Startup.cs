@@ -46,10 +46,6 @@ namespace Tgs.Payment.UmPay
                    var config = sp.GetRequiredService<IConfiguration>();
 
                    config.GetSection("UmPay").Bind(options);
-
-                   //var jsonOptions = sp.GetRequiredService<IOptions<JsonOptions>>().Value;
-
-                   //options.SystemSerializerOptions = jsonOptions.JsonSerializerOptions;
                })
                .AddSingleton<UmPaySerializer>();
 
