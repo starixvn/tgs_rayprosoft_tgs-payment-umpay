@@ -8,7 +8,7 @@
 
         public string MerchantNo { get; set; } = default!;
 
-        public int TradeStatus { get; set; }
+        public string TradeStatus { get; set; } = default!;
 
         public decimal Amount { get; set; }
 

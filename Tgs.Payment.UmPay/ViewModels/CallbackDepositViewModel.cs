@@ -1,31 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json.Serialization;
 
 namespace Tgs.Payment.UmPay.ViewModels
 {
     public class CallbackDepositViewModel
     {
-        [FromForm(Name = "outTradeNo")]
+        [JsonPropertyName("outTradeNo")]
         public string OutTradeNo { get; set; } = default!;
 
-        [FromForm(Name = "tradeNo")]
+        [JsonPropertyName("tradeNo")]
         public string TradeNo { get; set; } = default!;
 
-        [FromForm(Name = "merchantNo")]
+        [JsonPropertyName("merchantNo")]
         public string MerchantNo { get; set; } = default!;
 
-        [FromForm(Name = "tradeStatus")]
-        public int TradeStatus { get; set; }
+        [JsonPropertyName("tradeStatus")]
+        public string TradeStatus { get; set; } = default!;
 
-        [FromForm(Name = "amount")]
-        public decimal Amount { get; set; }
+        [JsonPropertyName("amount")]
+        public string Amount { get; set; } = default!;
 
-        [FromForm(Name = "real_amount")]
-        public decimal RealAmount { get; set; }
+        [JsonPropertyName("real_amount")]
+        public string RealAmount { get; set; } = default!;
 
-        [FromForm(Name = "sign")]
+        [JsonPropertyName("sign")]
         public string Sign { get; set; } = default!;
 
-        [FromForm(Name = "msg")]
+        [JsonPropertyName("msg")]
         public string Msg { get; set; } = default!;
     }
 }
