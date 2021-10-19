@@ -26,11 +26,9 @@ namespace Tgs.Payment.UmPay
                             return "";
                         else
                             return $"{p.Key}{p.Value}";
-                    }));
+                    }));            
 
-            var plainText = $"{content}";
-
-            var data = Encoding.UTF8.GetBytes(plainText);
+            var data = Encoding.UTF8.GetBytes(content);
             var base64 = Convert.ToBase64String(data);
 
             var fullText = $"{base64}{apiKey}";
