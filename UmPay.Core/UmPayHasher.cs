@@ -16,25 +16,19 @@ namespace Tgs.Payment.UmPay
         }
 
         public string ComputeHash(string apiKey, IDictionary<string, object> dict)
-        {
-            dict = dict
-                .Select(x => x)
-                .OrderBy(x => x.Key)
-                .ToDictionary(x => x.Key, x => x.Value);
-
+        {            
             var content = string.Join(
                 "",
-                dict.Select(p =>
-                {
-                    if (p.Key == "sign" || p.Key == "rate")
-                        return "";
-                    else
-                        return $"{p.Key}{p.Value}";
-                }));
+                dict.OrderBy(x => x.Key)
+                    .Select(p =>
+                    {
+                        if (p.Key == "sign" || p.Key == "rate")
+                            return "";
+                        else
+                            return $"{p.Key}{p.Value}";
+                    }));            
 
-            var plainText = $"{content}";
-
-            var data = Encoding.UTF8.GetBytes(plainText);
+            var data = Encoding.UTF8.GetBytes(content);
             var base64 = Convert.ToBase64String(data);
 
             var fullText = $"{base64}{apiKey}";
