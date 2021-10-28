@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.UmPay;
 using Tgs.Payment.UmPay.MessageQueue;
@@ -21,8 +23,23 @@ namespace Microsoft.Extensions.DependencyInjection
                     httpClient.BaseAddress = options.PaymentApiUrl;
                 })
                 .Services
+                .AddPaymentServiceClient((options, sp) =>
+                {
+                    var umPayOptions = sp.GetRequiredService<IOptions<UmPayOptions>>().Value;
+
+                    options.PaymentServiceBaseUrl = umPayOptions.PaymentServiceBaseUrl;
+
+                    options.JsonSerializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters =
+                        {
+                            new JsonStringEnumConverter()
+                        }
+                    };
+                })
                 .RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient)
-                .AddTransient<UmPayHasher>()
+                .AddSingleton<UmPayHasher>()
                 .AddSingleton<UmPaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {

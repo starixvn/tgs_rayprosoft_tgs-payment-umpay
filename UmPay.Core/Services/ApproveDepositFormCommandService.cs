@@ -16,6 +16,6 @@ namespace Tgs.Payment.UmPay.Services
         }
 
         public ValueTask ExecuteAsync(ApproveDepositFormCommand command, CancellationToken cancellationToken = default)
-            => _paymentClient.ApproveDepositAsync(command.FormId, command.BrandId);
+            => _paymentClient.ApproveDepositAsync(command.FormId, command.BrandId, command.ActualAmount);
     }
 }

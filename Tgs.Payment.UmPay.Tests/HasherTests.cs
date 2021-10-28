@@ -42,6 +42,34 @@ namespace Tgs.Payment.UmPay.Tests
         }
 
         [Test]
+        public void Verify_Callback_Hash()
+        {
+            var amount = "1000.00";
+            var tradeNo = "AH16345227581984";
+            var merchantNo = "MAJA1628579663";
+            var outTradeNo = "25292327378258416915355444242454340061";
+            var realAmount = "1000.00";
+            var tradeStatus = 2;
+
+            var dict = new Dictionary<string, object>
+            {
+                { "amount", amount },
+                { "tradeNo",tradeNo },
+                { "merchantNo", merchantNo },
+                { "outTradeNo", outTradeNo },
+                { "real_amount" , realAmount },
+                { "tradeStatus", tradeStatus }
+            };
+
+            var hasher = new UmPayHasher();
+            var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
+            var actual = hasher.ComputeHash(apiKey, dict);
+
+            var expected = "becb54ac0ca26a1cbbad5e072011841d";
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
         public void Max_Guid_To_UnSign_Integer()
         {
             var guid = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff");
