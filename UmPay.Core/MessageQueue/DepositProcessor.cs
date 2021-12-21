@@ -4,9 +4,12 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
+using Tgs.Payment.UmPay.Services;
+using TGS.ServiceUtility;
 
 namespace Tgs.Payment.UmPay.MessageQueue
 {
@@ -14,15 +17,18 @@ namespace Tgs.Payment.UmPay.MessageQueue
     {
         private readonly UmPaySerializer _umPaySerializer;
         private readonly UmPayClient _umPayClient;
+        private readonly IServiceProvider _serviceProvider;
         private readonly UmPayOptions _options;
 
         public DepositProcessor(
             UmPaySerializer umPaySerializer,
             UmPayClient umPayClient,
-            IOptions<UmPayOptions> optionsAccessor)
+            IOptions<UmPayOptions> optionsAccessor,
+            IServiceProvider serviceProvider)
         {
             _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
             _umPayClient = umPayClient ?? throw new ArgumentNullException(nameof(umPayClient));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _options = optionsAccessor.Value;
         }
 
@@ -49,6 +55,17 @@ namespace Tgs.Payment.UmPay.MessageQueue
 
             var depositResponse = await _umPayClient
                 .DepositAsync(settings.MerchantNo, settings.ApiKey, order)
+                .ConfigureAwait(false);
+
+            using var scope = _serviceProvider.CreateScope();
+
+            var scheduleCommandService =
+                scope.ServiceProvider.GetRequiredService<ICommandService<SendScheduleCommand>>();
+
+            var scheduleCommand = new SendScheduleCommand("tgs.payment.umpay.deposit.schedule", settings.OrderNo, DateTime.UtcNow.AddHours(1));
+
+            await scheduleCommandService
+                .ExecuteAsync(scheduleCommand)
                 .ConfigureAwait(false);
 
             if (depositResponse != null && depositResponse.Code == "1")
