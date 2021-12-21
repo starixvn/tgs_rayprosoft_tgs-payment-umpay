@@ -19,8 +19,7 @@ namespace UmPayTest
                        });
                    });
                    services.AddPaymentClient();
-                   services
-                       //.AddSystemJsonSerializer()
+                   services                       
                        .AddSingleton<UmPaySerializer>();
                    services.AddHostedService<Demo>();
                });
