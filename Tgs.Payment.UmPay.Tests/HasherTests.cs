@@ -70,6 +70,26 @@ namespace Tgs.Payment.UmPay.Tests
         }
 
         [Test]
+        public void Verify_Cancel_Order_Hash()
+        {
+            var orderNo = "01239876543";
+            var merchantNo = "MAJA1628579663";
+
+            var dict = new Dictionary<string, object>
+            {
+                { "orderNo",orderNo },
+                { "merchantNo", merchantNo }
+            };
+
+            var hasher = new UmPayHasher();
+            var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
+            var actual = hasher.ComputeHash(apiKey, dict);
+
+            var expected = "aba1e6f8235c7613a96cb34a1a15827d";
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
         public void Max_Guid_To_UnSign_Integer()
         {
             var guid = new Guid("ffffffff-ffff-ffff-ffff-ffffffffffff");
