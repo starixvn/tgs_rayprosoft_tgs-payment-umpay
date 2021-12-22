@@ -11,6 +11,8 @@ namespace Tgs.Payment.UmPay
         public Uri PaymentApiUrl { get; set; } = default!;
 
         public Uri PaymentServiceBaseUrl { get; set; } = default!;
+
+        public TimeSpan Expire { get; set; }
         public JsonSerializerOptions? SystemSerializerOptions { get; set; }
     }
 }

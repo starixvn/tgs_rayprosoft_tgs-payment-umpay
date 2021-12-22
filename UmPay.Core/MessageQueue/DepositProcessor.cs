@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
@@ -18,17 +19,20 @@ namespace Tgs.Payment.UmPay.MessageQueue
         private readonly UmPaySerializer _umPaySerializer;
         private readonly UmPayClient _umPayClient;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<DepositProcessor> _logger;
         private readonly UmPayOptions _options;
 
         public DepositProcessor(
             UmPaySerializer umPaySerializer,
             UmPayClient umPayClient,
             IOptions<UmPayOptions> optionsAccessor,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            ILogger<DepositProcessor> logger)
         {
             _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
             _umPayClient = umPayClient ?? throw new ArgumentNullException(nameof(umPayClient));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = optionsAccessor.Value;
         }
 
@@ -62,7 +66,9 @@ namespace Tgs.Payment.UmPay.MessageQueue
             var scheduleCommandService =
                 scope.ServiceProvider.GetRequiredService<ICommandService<SendScheduleCommand>>();
 
-            var scheduleCommand = new SendScheduleCommand("tgs.payment.umpay.deposit.schedule", settings.OrderNo, DateTime.UtcNow.AddHours(1));
+            var expireTime = _options.Expire;
+            _logger.LogInformation($"Expire Time:{expireTime:hh\\:mm\\:ss}");
+            var scheduleCommand = new SendScheduleCommand("tgs.payment.umpay.deposit.schedule", settings.OrderNo, DateTime.UtcNow.Add(expireTime));
 
             await scheduleCommandService
                 .ExecuteAsync(scheduleCommand)
