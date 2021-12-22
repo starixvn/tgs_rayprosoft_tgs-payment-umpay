@@ -11,5 +11,6 @@ data:
         "NatsUrl": "{{ .Values.nats }}",
         "CallbackBaseUrl": "{{ .Values.callbackBaseUrl }}",
         "PaymentServiceBaseUrl": "{{ .Values.paymentServiceBaseUrl  }}"
+        "Expire": "{{ .Values.expire }}"
       }
     }
