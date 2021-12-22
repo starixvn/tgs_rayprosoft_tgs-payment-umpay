@@ -10,7 +10,7 @@ data:
         "PaymentApiUrl": "{{ .Values.paymentApiUrl  }}",
         "NatsUrl": "{{ .Values.nats }}",
         "CallbackBaseUrl": "{{ .Values.callbackBaseUrl }}",
-        "PaymentServiceBaseUrl": "{{ .Values.paymentServiceBaseUrl  }}"
+        "PaymentServiceBaseUrl": "{{ .Values.paymentServiceBaseUrl  }}",
         "Expire": "{{ .Values.expire }}"
       }
     }
