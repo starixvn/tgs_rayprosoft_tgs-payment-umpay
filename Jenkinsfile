@@ -118,7 +118,7 @@ pipeline {
                                 --set connectionStrings.tgs="${tgs_tgs_conn}" \
                                 --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
                                 --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay"
+                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
                                 --set expire="$tgs_paymentExpire_umpay"
                         '''
                         sh '''
