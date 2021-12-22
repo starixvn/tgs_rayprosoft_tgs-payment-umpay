@@ -39,6 +39,8 @@ namespace Microsoft.Extensions.DependencyInjection
                     };
                 })
                 .RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient)
+                .AddTransient<DepositScheduleSender, DepositScheduleSender>()
+                .AddTransient<DepositRejectSender, DepositRejectSender>()
                 .AddSingleton<UmPayHasher>()
                 .AddSingleton<UmPaySerializer>()
                 .AddNatsMessageQueue(config =>
@@ -50,9 +52,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
                             options.Url = umPayOptions.NatsUrl;
                         })
-                        .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit")
-                        .AddProcessor<QueryExchangeRateProcessor>("tgs.payment.umpay.queryexchangerate");
-                })
+                        .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit")                        
+                        .AddProcessor<QueryExchangeRateProcessor>("tgs.payment.umpay.queryexchangerate")
+                        .AddHandler<DepositScheduleHandler>("tgs.payment.umpay.deposit.schedule", "tgs.payment.umpay.deposit.schedule");
+                })                
                 .AddPaymentClient();
     }
 }

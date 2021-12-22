@@ -5,9 +5,8 @@ pipeline {
 
 	environment {
 		BuildConfiguration = "Debug"
-		ImageName = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/payment-umpay"
-		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"
-		ImageTagUrl = "https://gitlab.com/api/v4/projects/20478010/registry/repositories/2254533/tags"
+        ImageName="harbor.rpgp.cc/tgs/payment-umpay"		
+		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"		
 	}
 	stages {
 		stage('Prepare'){
@@ -119,7 +118,8 @@ pipeline {
                                 --set connectionStrings.tgs="${tgs_tgs_conn}" \
                                 --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
                                 --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay"
+                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
+                                --set expire="$tgs_paymentExpire_umpay"
                         '''
                         sh '''
                             helm template deployment/k8s/umpay \
@@ -129,6 +129,7 @@ pipeline {
                                 --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
                                 --set nats="$tgs_nats" \
                                 --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
+                                --set expire="$tgs_paymentExpire_umpay" \
                             | kubectl -n $kube_ns apply -f -
                         '''
                     }
@@ -149,14 +150,7 @@ pipeline {
                 }
             }
         }
-
-		stage('Remove Image Tags') {					
-            steps {	
-			    withCredentials([string(credentialsId: "GitLabToken", variable: "GitLabToken")]) {					
-                    sh "curl --request DELETE --data \'name_regex_delete=.*\' --data \'keep_n=10\' --header \'PRIVATE-TOKEN: ${GitLabToken}\' ${ImageTagUrl}"
-                }
-            }
-        }	
+			
 	}
 
 	post {

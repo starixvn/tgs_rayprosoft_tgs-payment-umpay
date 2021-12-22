@@ -14,8 +14,8 @@ namespace Tgs.Payment.UmPay
 {
     public class UmPayClient
     {
-        private readonly HttpClient _httpClient;
-        private readonly JsonSerializerOptions? _jsonSerializerOptions;
+        private readonly HttpClient _httpClient;        
+        private readonly UmPayOptions _options;
         private readonly UmPayHasher _umPayHasher;
         private readonly ILogger<UmPayClient> _logger;
 
@@ -25,17 +25,17 @@ namespace Tgs.Payment.UmPay
             UmPayHasher umPayHasher,
             ILogger<UmPayClient> logger)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _jsonSerializerOptions = optionsAccessor.Value.SystemSerializerOptions;
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));            
+            _options = optionsAccessor.Value;
             _umPayHasher = umPayHasher ?? throw new ArgumentNullException(nameof(umPayHasher));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async ValueTask<UmPayDepositResponse?> DepositAsync(string merchantNo, string apiKey, DepositOrder order)
         {
-            var orderJson = JsonSerializer.Serialize(order, _jsonSerializerOptions);
+            var orderJson = JsonSerializer.Serialize(order);
             var orderDict = JsonSerializer
-                .Deserialize<Dictionary<string, object>>(orderJson, _jsonSerializerOptions)!;
+                .Deserialize<Dictionary<string, object>>(orderJson)!;
 
             var sign = _umPayHasher.ComputeHash(apiKey, orderDict);
 
@@ -60,7 +60,7 @@ namespace Tgs.Payment.UmPay
 
             response.EnsureSuccessStatusCode();
 
-            var apiResponseData = JsonSerializer.Deserialize<UmPayDepositResponse>(bodyJson, _jsonSerializerOptions);
+            var apiResponseData = JsonSerializer.Deserialize<UmPayDepositResponse>(bodyJson);
 
             return apiResponseData;
         }
@@ -70,7 +70,7 @@ namespace Tgs.Payment.UmPay
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri("https://hk-dev.um-pay.com/umpay/get_rate"),
+                RequestUri = new Uri($"{_options.PaymentApiUrl}/get_rate"),
                 Content = new StringContent("some json", Encoding.UTF8, MediaTypeNames.Application.Json),
             };
 
@@ -84,9 +84,43 @@ namespace Tgs.Payment.UmPay
 
             _logger.LogInformation($"ExchangeRate Body: {bodyJson}");
 
-            var result = JsonSerializer.Deserialize<UmPayQueryExchangeRateResponse>(bodyJson, _jsonSerializerOptions);
+            var result = JsonSerializer.Deserialize<UmPayQueryExchangeRateResponse>(bodyJson);
 
             return result!;
+        }
+
+        public async ValueTask<UmPayCancelDepositResponse?> CancelDepositAsync(string apiKey, CancelDepositOrder order)
+        {
+            var orderJson = JsonSerializer.Serialize(order);
+            var orderDict = JsonSerializer
+                .Deserialize<Dictionary<string, object>>(orderJson)!;
+            
+            var sign = _umPayHasher.ComputeHash(apiKey, orderDict);
+
+            orderDict["sign"] = sign;
+
+            var paramDict = orderDict
+                .AsEnumerable()
+                .Select(p => new KeyValuePair<string?, string?>(p.Key, p.Value?.ToString()));
+
+            var content = new FormUrlEncodedContent(paramDict);
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+            var response = await _httpClient
+                .PostAsync("/cancel_order", content)
+                .ConfigureAwait(false);
+
+            _logger.LogInformation($"Cancel Deposit StatusCode: {response.StatusCode}");
+
+            var bodyJson = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            _logger.LogInformation($"Cancel Deposit Body: {bodyJson}");
+
+            response.EnsureSuccessStatusCode();
+
+            var apiResponseData = JsonSerializer.Deserialize<UmPayCancelDepositResponse>(bodyJson);
+
+            return apiResponseData;
         }
     }
 }

@@ -14,13 +14,12 @@ namespace UmPayTest
                    {
                        config.ConfigQueueOptions((options, ap) =>
                        {
-                           options.Url = "nats://192.168.50.44:4222";
-                           //options.Url = "nats://localhost:4222";
+                           //options.Url = "nats://192.168.50.44:4222";
+                           options.Url = "nats://localhost:4222";
                        });
                    });
                    services.AddPaymentClient();
-                   services
-                       //.AddSystemJsonSerializer()
+                   services                       
                        .AddSingleton<UmPaySerializer>();
                    services.AddHostedService<Demo>();
                });
