@@ -49,7 +49,7 @@ namespace Tgs.Payment.UmPay
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
             var response = await _httpClient
-                .PostAsync("", content)
+                .PostAsync("/umpay", content)
                 .ConfigureAwait(false);
 
             _logger.LogInformation($"Deposit StatusCode: {response.StatusCode}");
@@ -70,7 +70,7 @@ namespace Tgs.Payment.UmPay
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_options.PaymentApiUrl}/get_rate"),
+                RequestUri = new Uri($"{_options.PaymentApiUrl}/umpay/get_rate"),
                 Content = new StringContent("some json", Encoding.UTF8, MediaTypeNames.Application.Json),
             };
 
@@ -97,7 +97,7 @@ namespace Tgs.Payment.UmPay
             
             var sign = _umPayHasher.ComputeHash(apiKey, orderDict);
 
-            orderDict["sign"] = sign;
+            orderDict["sign"] = sign;            
 
             var paramDict = orderDict
                 .AsEnumerable()
@@ -107,7 +107,7 @@ namespace Tgs.Payment.UmPay
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
             var response = await _httpClient
-                .PostAsync("/cancel_order", content)
+                .PostAsync("/umpay/cancel_order", content)
                 .ConfigureAwait(false);
 
             _logger.LogInformation($"Cancel Deposit StatusCode: {response.StatusCode}");
