@@ -4,9 +4,12 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.MessageQueue;
 using Tgs.Payment.Protos;
+using Tgs.Payment.UmPay.Services;
+using TGS.ServiceUtility;
 
 namespace Tgs.Payment.UmPay.MessageQueue
 {
@@ -14,15 +17,21 @@ namespace Tgs.Payment.UmPay.MessageQueue
     {
         private readonly UmPaySerializer _umPaySerializer;
         private readonly UmPayClient _umPayClient;
+        private readonly ICommandService<SendScheduleCommand> _scheduleCommandService;
+        private readonly ILogger<DepositProcessor> _logger;
         private readonly UmPayOptions _options;
 
         public DepositProcessor(
             UmPaySerializer umPaySerializer,
             UmPayClient umPayClient,
-            IOptions<UmPayOptions> optionsAccessor)
+            IOptions<UmPayOptions> optionsAccessor,
+            ICommandService<SendScheduleCommand> scheduleCommandService,
+            ILogger<DepositProcessor> logger)
         {
             _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
             _umPayClient = umPayClient ?? throw new ArgumentNullException(nameof(umPayClient));
+            _scheduleCommandService = scheduleCommandService ?? throw new ArgumentNullException(nameof(scheduleCommandService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _options = optionsAccessor.Value;
         }
 
@@ -49,6 +58,14 @@ namespace Tgs.Payment.UmPay.MessageQueue
 
             var depositResponse = await _umPayClient
                 .DepositAsync(settings.MerchantNo, settings.ApiKey, order)
+                .ConfigureAwait(false);
+
+            var expireTime = _options.Expire;
+            _logger.LogInformation($"Expire Time:{expireTime:hh\\:mm\\:ss}");
+            var scheduleCommand = new SendScheduleCommand("tgs.payment.umpay.deposit.schedule", settings.OrderNo, DateTime.UtcNow.Add(expireTime));
+
+            await _scheduleCommandService
+                .ExecuteAsync(scheduleCommand)
                 .ConfigureAwait(false);
 
             if (depositResponse != null && depositResponse.Code == "1")
