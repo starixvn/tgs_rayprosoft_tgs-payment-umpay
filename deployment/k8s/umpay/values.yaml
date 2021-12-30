@@ -4,8 +4,8 @@
 
 replicaCount: 1
 
-image:
-  repository: registry.gitlab.com/rayprosoft/turnkey-gaming-system/payment-umpay
+image:  
+  repository: harbor.rpgp.cc/tgs/payment-umpay
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
@@ -13,7 +13,7 @@ image:
 namespace: dev
 
 imagePullSecrets:
-  - name: registry-credentials
+  - name: secret-tgs-harbor
 nameOverride: "payment-umpay"
 fullnameOverride: "payment-umpay"
 
@@ -25,6 +25,7 @@ nats: nats://localhost:4222
 paymentApiUrl: https://hk-dev.um-pay.com/umpay
 callbackBaseUrl: https://dev-payment.rpgp.cc/umpay
 paymentServiceBaseUrl: http://payment-api
+expire: 01:00:00
 
 podAnnotations: {}
 

@@ -12,8 +12,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="TGS.Core.Infrastructures.Json" Version="0.0.1" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
-    <PackageReference Include="Tgs.Payment.Client" Version="0.2.0" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.2.0" />
+    <PackageReference Include="Tgs.Payment.Client" Version="0.3.9" />
   </ItemGroup>
 
   <ItemGroup>
