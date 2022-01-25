@@ -72,7 +72,7 @@ builder.Services.AddOpenTelemetryTracing(builder =>
         .AddSource("Tgs.Payment.UmPay")
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddProfileViewExporter(builder => { })
+        .AddProfileViewExporter()
         .AddOtlpExporter();
 });
 
