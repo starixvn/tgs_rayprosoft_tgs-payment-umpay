@@ -9,14 +9,13 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
-  
+
 imagePullSecrets:
   - name: secret-tgs-harbor
 nameOverride: "payment-umpay"
 fullnameOverride: "payment-umpay"
 
 nats: nats://localhost:4222
-
 paymentApiUrl: https://hk-dev.playpay.vip
 callbackBaseUrl: https://dev-payment.rpgp.cc/umpay
 paymentServiceBaseUrl: http://payment-api
