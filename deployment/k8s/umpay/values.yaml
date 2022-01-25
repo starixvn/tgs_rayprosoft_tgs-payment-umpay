@@ -17,12 +17,9 @@ imagePullSecrets:
 nameOverride: "payment-umpay"
 fullnameOverride: "payment-umpay"
 
-connectionStrings:
-  tgs: Server=localhost;Database=tgs;User Id=tgs;Password=1qaz2wsx!@
-
 nats: nats://localhost:4222
 
-paymentApiUrl: https://hk-dev.um-pay.com/umpay
+paymentApiUrl: https://hk-dev.playpay.vip
 callbackBaseUrl: https://dev-payment.rpgp.cc/umpay
 paymentServiceBaseUrl: http://payment-api
 expire: 01:00:00
@@ -61,7 +58,7 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 
 nodeSelector: {}

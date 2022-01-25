@@ -5,8 +5,7 @@ pipeline {
 
 	environment {
 		BuildConfiguration = "Debug"
-        ImageName="harbor.rpgp.cc/tgs/payment-umpay"		
-		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"		
+        ImageName="harbor.rpgp.cc/tgs/payment-umpay"
 	}
 	stages {
 		stage('Prepare'){
@@ -137,7 +136,7 @@ pipeline {
 			}
 		}
 
-		stage('Add Tag') {
+		stage('Add Tag on Prod') {
             when {
                 expression {
                     return env.kube_ns == 'prod';

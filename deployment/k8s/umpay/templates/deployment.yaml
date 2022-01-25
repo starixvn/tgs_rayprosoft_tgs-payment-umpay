@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "umpay.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+    {{- if not .Values.autoscaling.enabled }}
+    replicas: {{ .Values.replicaCount }}
+    {{- end }}
   selector:
     matchLabels:
       {{- include "umpay.selectorLabels" . | nindent 6 }}
@@ -60,12 +62,15 @@ spec:
               subPath: appsettings.json
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
-          readinessProbe:
+              periodSeconds: 5
+          startupProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: http
+              periodSeconds: 2
+              failureThreshold: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
