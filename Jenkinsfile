@@ -118,7 +118,7 @@ pipeline {
                     withCredentials([string(credentialsId: "tgs-${kube_ns}-connectionstring", variable: "tgs_tgs_conn")]) {
                         sh '''
                             cat << EOF | yq e -P | helm template deployment/k8s/umpay \
-                                -n ${kube_ns} \                            
+                                -n ${kube_ns} \
                                 --set image.tag=${TAG} \
                                 --set connectionStrings.tgs="${tgs_tgs_conn}" \
                                 --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
@@ -135,7 +135,7 @@ pipeline {
                         sh '''
                             cat << EOF | yq e -P | helm template deployment/k8s/umpay \
                                 -n ${kube_ns} \
-                                --set image.tag=${TAG} \                                
+                                --set image.tag=${TAG} \
                                 --set connectionStrings.tgs="${tgs_tgs_conn}" \
                                 --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
                                 --set nats="$tgs_nats" \
