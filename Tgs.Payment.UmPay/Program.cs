@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -50,6 +51,18 @@ builder.Services.AddTransient(sp =>
 });
 
 builder.Services.AddHealthChecks();
+
+builder.Services
+    .AddOptions<OtlpExporterOptions>()
+    .Configure<IConfiguration>((options, conifg) =>
+    {
+        var nodeIp = conifg.GetValue<string>("NODE_IP");
+
+        if (!string.IsNullOrWhiteSpace(nodeIp))
+            options.Endpoint = new Uri($"http://{nodeIp}:4317");
+
+        conifg.GetSection("Opentelemetry:Tracing").Bind(options);
+    });
 
 builder.Services.AddOpenTelemetryTracing(builder =>
 {

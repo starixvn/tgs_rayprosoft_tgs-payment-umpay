@@ -20,7 +20,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "OTEL_SERVICE_NAME": "payment-umpay(local)",
+        "OTEL_SERVICE_NAME": "Payment-Umpay(local)",
         "NODE_IP": "192.168.50.112"
       },
       "dotnetRunMessages": true,
