@@ -53,13 +53,13 @@ spec:
             httpGet:
               path: /healthz
               port: http
-              periodSeconds: 5
+            periodSeconds: 5
           startupProbe:
             httpGet:
               path: /healthz
               port: http
-              periodSeconds: 2
-              failureThreshold: 30
+            periodSeconds: 2
+            failureThreshold: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
