@@ -117,25 +117,35 @@ pipeline {
 				withKubeConfig([credentialsId: env.k8s_config]) {
                     withCredentials([string(credentialsId: "tgs-${kube_ns}-connectionstring", variable: "tgs_tgs_conn")]) {
                         sh '''
-                            helm template deployment/k8s/umpay \
+                            cat << EOF | yq e -P | helm template deployment/k8s/umpay \
+                                -n ${kube_ns} \                            
                                 --set image.tag=${TAG} \
-                                --set namespace=$kube_ns \
-                                --set connectionStrings.tgs="${tgs_tgs_conn}" \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
-                                --set expire="$tgs_paymentExpire_umpay"
-                        '''
-                        sh '''
-                            helm template deployment/k8s/umpay \
-                                --set image.tag=${TAG} \
-                                --set namespace=$kube_ns \
                                 --set connectionStrings.tgs="${tgs_tgs_conn}" \
                                 --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
                                 --set nats="$tgs_nats" \
                                 --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
                                 --set expire="$tgs_paymentExpire_umpay" \
-                            | kubectl -n $kube_ns apply -f -
+                                -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated]
+                            }
+
+                        '''
+                        sh '''
+                            cat << EOF | yq e -P | helm template deployment/k8s/umpay \
+                                -n ${kube_ns} \
+                                --set image.tag=${TAG} \                                
+                                --set connectionStrings.tgs="${tgs_tgs_conn}" \
+                                --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
+                                --set nats="$tgs_nats" \
+                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
+                                --set expire="$tgs_paymentExpire_umpay" \
+                            | kubectl -n ${kube_ns} apply -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated]
+                            }
                         '''
                     }
                 }
