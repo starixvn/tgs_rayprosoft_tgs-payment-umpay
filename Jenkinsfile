@@ -130,7 +130,6 @@ pipeline {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated]
                             }
-
                         '''
                         sh '''
                             cat << EOF | yq e -P | helm template deployment/k8s/umpay \
