@@ -1,11 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
+    <TargetFramework>net5.0;net6.0</TargetFramework>
     <RootNamespace>Tgs.Payment.UmPay</RootNamespace>
+    <Nullable>enable</Nullable>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<LangVersion>10</LangVersion>
     <Version>0.0.1</Version>
     <Authors>Raypro</Authors>
+	<Company>Raypro</Company>
+	<IsPackable>true</IsPackable>
   </PropertyGroup>
 
 </Project>
