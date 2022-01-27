@@ -140,6 +140,7 @@ pipeline {
                                 --set nats="$tgs_nats" \
                                 --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
                                 --set expire="$tgs_paymentExpire_umpay" \
+                                -f - \
                             | kubectl -n ${kube_ns} apply -f -
                             {
                                 "nodeSelector": $node_selector,
