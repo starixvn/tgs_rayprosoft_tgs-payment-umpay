@@ -1,3 +1,4 @@
+@Library('global-shared-library') _
 def message = "";
 
 pipeline {
@@ -114,39 +115,43 @@ pipeline {
 
 		stage('Deploy to k8s') {			
 			steps {
-				withKubeConfig([credentialsId: env.k8s_config]) {
-                    withCredentials([string(credentialsId: "tgs-${kube_ns}-connectionstring", variable: "tgs_tgs_conn")]) {
-                        sh '''
+                script {
+
+                    def resources = getResources(env.k8s_config, env.kube_ns, "payment-umpay")
+                    println resources
+
+                    withKubeConfig([credentialsId: env.k8s_config]) {
+                        sh """
                             cat << EOF | yq e -P | helm template deployment/k8s/umpay \
                                 -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set connectionStrings.tgs="${tgs_tgs_conn}" \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
-                                --set expire="$tgs_paymentExpire_umpay" \
+                                --set paymentApiUrl=$tgs_paymentApiUrl_umpay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
+                                --set expire=$tgs_paymentExpire_umpay \
                                 -f -
                             {
                                 "nodeSelector": $node_selector,
-                                "tolerations": [$dedicated]
+                                "tolerations": [$dedicated],
+                                "resources": $resources
                             }
-                        '''
-                        sh '''
+                        """
+                        sh """
                             cat << EOF | yq e -P | helm template deployment/k8s/umpay \
                                 -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set connectionStrings.tgs="${tgs_tgs_conn}" \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
-                                --set expire="$tgs_paymentExpire_umpay" \
+                                --set paymentApiUrl=$tgs_paymentApiUrl_umpay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
+                                --set expire=$tgs_paymentExpire_umpay \
                                 -f - \
                             | kubectl -n ${kube_ns} apply -f -
                             {
                                 "nodeSelector": $node_selector,
-                                "tolerations": [$dedicated]
+                                "tolerations": [$dedicated],
+                                "resources": $resources
                             }
-                        '''
+                        """
                     }
                 }
 			}
@@ -179,18 +184,4 @@ pipeline {
             sendTelegram("<b>Failed Pipeline:</b> ${currentBuild.fullDisplayName} Something is wrong with ${env.BUILD_URL}/console\n${currentBuild.getBuildCauses()[0].shortDescription}\n")
         }		
 	}
-}
-
-def sendTelegram(message) {
-    def encodedMessage = URLEncoder.encode(message, "UTF-8")
-
-    withCredentials([string(credentialsId: "telegramToken", variable: "TOKEN"), string(credentialsId: "telegramChatId", variable: "CHAT_ID")]) {
-
-        response = httpRequest (consoleLogResponseBody: true,
-                contentType: 'APPLICATION_JSON',
-                httpMode: 'GET',
-                url: "https://api.telegram.org/bot${TOKEN}/sendMessage?text=${encodedMessage}&chat_id=${CHAT_ID}",
-                validResponseCodes: '200')
-        return response
-    }
 }
