@@ -19,7 +19,7 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
 									"resources": $resources
 								}
 							"""},
-		   helmRunExec: -> { -> sh """
+		   helmRunExec: { -> sh """
 								cat << EOF | yq e -P | helm template deployment/k8s/umpay \
 									-n ${kube_ns} \
 									--set image.tag=${TAG} \
