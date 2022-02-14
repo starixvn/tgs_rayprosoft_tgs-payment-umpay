@@ -4,7 +4,7 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
            pushPackageName: 'Tgs.Payment.UmPay.Client.csproj',
            buildProjectName: "Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj",
 		   deploymentName: "payment-umpay",
-		   helmPrintExec: -> sh """
+		   helmPrintExec: { -> sh """
 								cat << EOF | yq e -P | helm template deployment/k8s/umpay \
 									-n ${kube_ns} \
 									--set image.tag=${TAG} \
@@ -18,8 +18,8 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
 									"tolerations": [$dedicated],
 									"resources": $resources
 								}
-							""",
-		   helmRunExec: -> sh """
+							"""},
+		   helmRunExec: -> { -> sh """
 								cat << EOF | yq e -P | helm template deployment/k8s/umpay \
 									-n ${kube_ns} \
 									--set image.tag=${TAG} \
@@ -34,4 +34,4 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
 									"tolerations": [$dedicated],
 									"resources": $resources
 								}
-							""")
+							"""}
