@@ -1,7 +1,7 @@
 @Library('global-shared-library') _
-_deploy(imageName: 'harbor.rpgp.cc/tgs/payment-umpay', 
-        pushPackagePath: 'Tgs.Payment.UmPay.Client',
-        pushPackageName: 'Tgs.Payment.UmPay.Client.csproj',
+_deploy(imageName: "harbor.rpgp.cc/tgs/payment-umpay", 
+        pushPackagePath: "Tgs.Payment.UmPay.Client",
+        pushPackageName: "Tgs.Payment.UmPay.Client.csproj",
         buildProjectName: "Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj",
         deploymentName: "payment-umpay",
         nugetSource: "raypro",
