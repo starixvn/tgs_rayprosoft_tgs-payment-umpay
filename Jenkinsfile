@@ -1,38 +1,38 @@
 @Library('global-shared-library') _
 _deploy(imageName: 'harbor.rpgp.cc/tgs/payment-umpay', 
-		pushPackagePath: 'Tgs.Payment.UmPay.Client',
+        pushPackagePath: 'Tgs.Payment.UmPay.Client',
         pushPackageName: 'Tgs.Payment.UmPay.Client.csproj',
         buildProjectName: "Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj",
-		deploymentName: "payment-umpay",
-		nugetSource: "raypro",
-		helmPrintExec: { resources -> sh """
-							cat << EOF | yq e -P | helm template deployment/k8s/umpay \
-									-n ${kube_ns} \
-									--set image.tag=${TAG} \
-									--set paymentApiUrl=$tgs_paymentApiUrl_umpay \
-									--set nats=$tgs_nats \
-									--set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
-									--set expire=$tgs_paymentExpire_umpay \
-									-f -
-								{
-									"nodeSelector": $node_selector,
-									"tolerations": [$dedicated],
-									"resources": ${resources}
-								}
-							"""},
-		helmRunExec: { resources -> sh """
-							cat << EOF | yq e -P | helm template deployment/k8s/umpay \
-									-n ${kube_ns} \
-									--set image.tag=${TAG} \
-									--set paymentApiUrl=$tgs_paymentApiUrl_umpay \
-									--set nats=$tgs_nats \
-									--set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
-									--set expire=$tgs_paymentExpire_umpay \
-									-f - \
-								| kubectl -n ${kube_ns} apply -f -
-								{
-									"nodeSelector": $node_selector,
-									"tolerations": [$dedicated],
-									"resources": ${resources}
-								}
-							"""})
+        deploymentName: "payment-umpay",
+        nugetSource: "raypro",
+        helmPrintExec: { resources -> sh """
+                            cat << EOF | yq e -P | helm template deployment/k8s/umpay \
+                                -n ${kube_ns} \
+                                --set image.tag=${TAG} \
+                                --set paymentApiUrl=$tgs_paymentApiUrl_umpay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
+                                --set expire=$tgs_paymentExpire_umpay \
+                                -f -
+                            {
+	                            "nodeSelector": $node_selector,
+	                            "tolerations": [$dedicated],
+	                            "resources": ${resources}
+                            }
+                        """},
+        helmRunExec: { resources -> sh """
+                            cat << EOF | yq e -P | helm template deployment/k8s/umpay \
+                                    -n ${kube_ns} \
+                                    --set image.tag=${TAG} \
+                                    --set paymentApiUrl=$tgs_paymentApiUrl_umpay \
+                                    --set nats=$tgs_nats \
+                                    --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
+                                    --set expire=$tgs_paymentExpire_umpay \
+                                    -f - \
+                                | kubectl -n ${kube_ns} apply -f -
+                                {
+                                    "nodeSelector": $node_selector,
+                                    "tolerations": [$dedicated],
+                                    "resources": ${resources}
+                                }
+                            """})
