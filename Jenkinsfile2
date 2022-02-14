@@ -4,7 +4,8 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
            pushPackageName: 'Tgs.Payment.UmPay.Client.csproj',
            buildProjectName: "Tgs.Payment.UmPay/Tgs.Payment.UmPay.csproj",
 		   deploymentName: "payment-umpay",
-		   helmPrintExec: { resources -> sh """
+		   nugetSource: "raypro",
+		   helmPrintExec: { -> sh """
 								cat << EOF | yq e -P | helm template deployment/k8s/umpay \
 									-n ${kube_ns} \
 									--set image.tag=${TAG} \
@@ -16,10 +17,10 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
 								{
 									"nodeSelector": $node_selector,
 									"tolerations": [$dedicated],
-									"resources": ${resources}
+									"resources": $resources
 								}
 							"""},
-		   helmRunExec: { resources -> sh """
+		   helmRunExec: { -> sh """
 								cat << EOF | yq e -P | helm template deployment/k8s/umpay \
 									-n ${kube_ns} \
 									--set image.tag=${TAG} \
@@ -32,6 +33,6 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
 								{
 									"nodeSelector": $node_selector,
 									"tolerations": [$dedicated],
-									"resources": ${resources}
+									"resources": $resources
 								}
 							"""})
