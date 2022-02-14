@@ -34,4 +34,4 @@ setPayment(imageName: 'harbor.rpgp.cc/tgs/payment-umpay',
 									"tolerations": [$dedicated],
 									"resources": $resources
 								}
-							"""}
+							"""})
