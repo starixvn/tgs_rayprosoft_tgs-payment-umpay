@@ -3,6 +3,7 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "umpay.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "umpay.labels" . | nindent 4 }}
 spec:

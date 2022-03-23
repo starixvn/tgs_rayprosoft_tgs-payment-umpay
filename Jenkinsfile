@@ -1,3 +1,4 @@
+@Library('global-shared-library') _
 def message = "";
 
 pipeline {
@@ -5,8 +6,7 @@ pipeline {
 
 	environment {
 		BuildConfiguration = "Debug"
-        ImageName="harbor.rpgp.cc/tgs/payment-umpay"		
-		GitUrl = "gitlab.com/rayprosoft/tgs-payment-umpay.git"		
+        ImageName="harbor.rpgp.cc/tgs/payment-umpay"
 	}
 	stages {
 		stage('Prepare'){
@@ -19,14 +19,20 @@ pipeline {
                         case ['main', 'origin/main']:
                             env.kube_ns = "prod";
                             env.k8s_config = 'stag-k8s-config';
+                            env.node_selector = '{ "dedicated": "prod" }';
+                            env.dedicated = '{"effect":"NoSchedule","key": "dedicated", "operator": "Equal", "value": "prod"}';
                             break;
                         case ['release', 'origin/release']:
                             env.kube_ns = "staging";
                             env.k8s_config = 'stag-k8s-config';
+                            env.node_selector = '{ "dedicated": "nonprod" }';
+                            env.dedicated = '{"effect":"NoSchedule","key": "dedicated", "operator": "Equal", "value": "nonprod"}';
                             break;
                         default:
                             env.kube_ns = "dev";
-                            env.k8s_config = 'k8s-kube-config' 
+                            env.k8s_config = 'k8s-kube-config';
+                            env.node_selector = '{}';
+                            env.dedicated = '';
                             break;
                     }
 				}
@@ -109,35 +115,49 @@ pipeline {
 
 		stage('Deploy to k8s') {			
 			steps {
-				withKubeConfig([credentialsId: env.k8s_config]) {
-                    withCredentials([string(credentialsId: "tgs-${kube_ns}-connectionstring", variable: "tgs_tgs_conn")]) {
-                        sh '''
-                            helm template deployment/k8s/umpay \
+                script {
+
+                    def resources = getResources(env.k8s_config, env.kube_ns, "payment-umpay")
+                    println resources
+
+                    withKubeConfig([credentialsId: env.k8s_config]) {
+                        sh """
+                            cat << EOF | yq e -P | helm template deployment/k8s/umpay \
+                                -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set namespace=$kube_ns \
-                                --set connectionStrings.tgs="${tgs_tgs_conn}" \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
-                                --set expire="$tgs_paymentExpire_umpay"
-                        '''
-                        sh '''
-                            helm template deployment/k8s/umpay \
+                                --set paymentApiUrl=$tgs_paymentApiUrl_umpay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
+                                --set expire=$tgs_paymentExpire_umpay \
+                                -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated],
+                                "resources": $resources
+                            }
+                        """
+                        sh """
+                            cat << EOF | yq e -P | helm template deployment/k8s/umpay \
+                                -n ${kube_ns} \
                                 --set image.tag=${TAG} \
-                                --set namespace=$kube_ns \
-                                --set connectionStrings.tgs="${tgs_tgs_conn}" \
-                                --set paymentApiUrl="$tgs_paymentApiUrl_umpay" \
-                                --set nats="$tgs_nats" \
-                                --set callbackBaseUrl="$tgs_paymentCallbackBaseUrl_umpay" \
-                                --set expire="$tgs_paymentExpire_umpay" \
-                            | kubectl -n $kube_ns apply -f -
-                        '''
+                                --set paymentApiUrl=$tgs_paymentApiUrl_umpay \
+                                --set nats=$tgs_nats \
+                                --set callbackBaseUrl=$tgs_paymentCallbackBaseUrl_umpay \
+                                --set expire=$tgs_paymentExpire_umpay \
+                                -f - \
+                            | kubectl -n ${kube_ns} apply -f -
+                            {
+                                "nodeSelector": $node_selector,
+                                "tolerations": [$dedicated],
+                                "resources": $resources
+                            }
+                        """
                     }
                 }
 			}
 		}
 
-		stage('Add Tag') {
+		stage('Add Tag on Prod') {
             when {
                 expression {
                     return env.kube_ns == 'prod';
@@ -164,18 +184,4 @@ pipeline {
             sendTelegram("<b>Failed Pipeline:</b> ${currentBuild.fullDisplayName} Something is wrong with ${env.BUILD_URL}/console\n${currentBuild.getBuildCauses()[0].shortDescription}\n")
         }		
 	}
-}
-
-def sendTelegram(message) {
-    def encodedMessage = URLEncoder.encode(message, "UTF-8")
-
-    withCredentials([string(credentialsId: "telegramToken", variable: "TOKEN"), string(credentialsId: "telegramChatId", variable: "CHAT_ID")]) {
-
-        response = httpRequest (consoleLogResponseBody: true,
-                contentType: 'APPLICATION_JSON',
-                httpMode: 'GET',
-                url: "https://api.telegram.org/bot${TOKEN}/sendMessage?text=${encodedMessage}&chat_id=${CHAT_ID}",
-                validResponseCodes: '200')
-        return response
-    }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
@@ -52,10 +51,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
                             options.Url = umPayOptions.NatsUrl;
                         })
-                        .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit")                        
+                        .AddProcessor<DepositProcessor>("tgs.payment.umpay.deposit", "tgs.payment.umpay.deposit")
                         .AddProcessor<QueryExchangeRateProcessor>("tgs.payment.umpay.queryexchangerate")
                         .AddHandler<DepositScheduleHandler>("tgs.payment.umpay.deposit.schedule", "tgs.payment.umpay.deposit.schedule");
-                })                
+                })
                 .AddPaymentClient();
     }
 }

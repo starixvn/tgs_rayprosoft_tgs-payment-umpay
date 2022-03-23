@@ -10,19 +10,13 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-namespace: dev
-
 imagePullSecrets:
   - name: secret-tgs-harbor
 nameOverride: "payment-umpay"
 fullnameOverride: "payment-umpay"
 
-connectionStrings:
-  tgs: Server=localhost;Database=tgs;User Id=tgs;Password=1qaz2wsx!@
-
 nats: nats://localhost:4222
-
-paymentApiUrl: https://hk-dev.um-pay.com/umpay
+paymentApiUrl: https://hk-dev.playpay.vip
 callbackBaseUrl: https://dev-payment.rpgp.cc/umpay
 paymentServiceBaseUrl: http://payment-api
 expire: 01:00:00
@@ -51,17 +45,17 @@ resources:
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
     cpu: 400m
-    memory: 1Gi
+    memory: 200Mi
   requests:
-    cpu: 400m
-    memory: 1Gi
+    cpu: 50m
+    memory: 50Mi
 
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 
 nodeSelector: {}

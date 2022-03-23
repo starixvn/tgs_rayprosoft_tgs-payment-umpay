@@ -35,6 +35,7 @@ Common labels
 */}}
 {{- define "umpay.labels" -}}
 {{ include "umpay.selectorLabels" . }}
+tgs.kind: payment
 {{- end }}
 
 {{/*
