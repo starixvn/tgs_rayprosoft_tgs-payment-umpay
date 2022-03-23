@@ -1,6 +1,5 @@
-﻿namespace Tgs.Payment.UmPay
+﻿namespace Tgs.Payment.UmPay;
+
+public class UmPayDepositFailResponse : UmPayDepositResponse
 {
-    public class UmPayDepositFailResponse : UmPayDepositResponse
-    {
-    }
 }

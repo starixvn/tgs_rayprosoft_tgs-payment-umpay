@@ -64,17 +64,14 @@ builder.Services
         conifg.GetSection("Opentelemetry:Tracing").Bind(options);
     });
 
-builder.Services.AddOpenTelemetryTracing(builder =>
-{
-    builder
-        .SetResourceBuilder(ResourceBuilder.CreateDefault()
-        .AddEnvironmentVariableDetector())
-        .AddSource("Tgs.Payment.UmPay")
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddProfileViewExporter()
-        .AddOtlpExporter();
-});
+builder.Services.AddOpenTelemetryTracing(builder => builder
+    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+    .AddEnvironmentVariableDetector())
+    .AddSource("Tgs.Payment.UmPay")
+    .AddAspNetCoreInstrumentation()
+    .AddHttpClientInstrumentation()
+    .AddProfileViewExporter()
+    .AddOtlpExporter());
 
 builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
 {
@@ -101,7 +98,7 @@ app.UseRouting();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapControllers();
+    _ = endpoints.MapControllers();
 });
 
 app.MapHealthChecks("/healthz",
@@ -165,7 +162,7 @@ app.Use(async (context, next) =>
 
     using var stream = new StreamReader(context.Request.Body);
 
-    await stream.ReadToEndAsync();
+    _ = await stream.ReadToEndAsync();
 });
 
 app.MapProfileViewer();
