@@ -19,20 +19,14 @@ pipeline {
                         case ['main', 'origin/main']:
                             env.kube_ns = "prod";
                             env.k8s_config = 'stag-k8s-config';
-                            env.node_selector = '{ "dedicated": "prod" }';
-                            env.dedicated = '{"effect":"NoSchedule","key": "dedicated", "operator": "Equal", "value": "prod"}';
                             break;
                         case ['release', 'origin/release']:
                             env.kube_ns = "staging";
                             env.k8s_config = 'stag-k8s-config';
-                            env.node_selector = '{ "dedicated": "nonprod" }';
-                            env.dedicated = '{"effect":"NoSchedule","key": "dedicated", "operator": "Equal", "value": "nonprod"}';
                             break;
                         default:
                             env.kube_ns = "dev";
                             env.k8s_config = 'k8s-kube-config';
-                            env.node_selector = '{}';
-                            env.dedicated = '';
                             break;
                     }
 				}
@@ -93,7 +87,7 @@ pipeline {
 
 		stage('Push Docker Image') {
 			steps {
-				sh 'sudo docker push $ImageName:${TAG}'
+				sh 'docker push $ImageName:${TAG}'
 			}
 		}
 
@@ -118,7 +112,13 @@ pipeline {
                 script {
 
                     def resources = getResources(env.k8s_config, env.kube_ns, "payment-umpay")
+                    def dedicated = getTgsSettings(env.k8s_config, env.kube_ns, "dedicated")
+                    def node_selector = getTgsSettings(env.k8s_config, env.kube_ns, "node-selector")
+
                     println resources
+                    println dedicated
+                    println node_selector
+
 
                     withKubeConfig([credentialsId: env.k8s_config]) {
                         sh """

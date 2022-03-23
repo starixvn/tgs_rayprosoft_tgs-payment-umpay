@@ -1,6 +1,5 @@
-﻿namespace Tgs.Payment.UmPay
-{
-    public record UmPayQueryExchangeRateApplyInfo(
-        UmPayQueryExchangeRateSettings Settings,
-        UmPayQueryExchangeRateResponse Response);
-}
+﻿namespace Tgs.Payment.UmPay;
+
+public record UmPayQueryExchangeRateApplyInfo(
+    UmPayQueryExchangeRateSettings Settings,
+    UmPayQueryExchangeRateResponse Response);
