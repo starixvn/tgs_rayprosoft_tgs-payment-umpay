@@ -64,8 +64,7 @@ builder.Services.AddOpenTelemetryTracing(builder => builder
     .AddEnvironmentVariableDetector())
     .AddSource("Tgs.*")
     .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation()
-    .AddProfileViewExporter()
+    .AddHttpClientInstrumentation()    
     .AddOtlpExporter());
 
 builder.Services.Configure<AspNetCoreInstrumentationOptions>(options =>
