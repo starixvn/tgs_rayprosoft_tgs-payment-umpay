@@ -16,6 +16,9 @@ data:
     }
   monitor.settings.json: |
     {
+      "Metrics": {
+        "MetricCount": "1"
+      },
       "Logging":{
         "Console": {
           "FormatterName": "json"
