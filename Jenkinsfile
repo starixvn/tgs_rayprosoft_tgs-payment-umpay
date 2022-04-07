@@ -75,7 +75,7 @@ pipeline {
 
 			steps {
 				sh 'dotnet pack -c $BuildConfiguration "Tgs.Payment.UmPay.Client/Tgs.Payment.UmPay.Client.csproj" --no-build'
-				sh 'dotnet nuget push "Tgs.Payment.UmPay.Client/bin/$BuildConfiguration/*.nupkg" --source "raypro" --skip-duplicate'
+				sh 'dotnet nuget push "Tgs.Payment.UmPay.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k admin --skip-duplicate'
 			}
 		}
 
