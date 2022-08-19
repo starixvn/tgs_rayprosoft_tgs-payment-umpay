@@ -7,70 +7,71 @@ using Microsoft.Extensions.Logging;
 using Tgs.Payment.Clients;
 using Tgs.Payment.UmPay;
 
-namespace UmPayTest
+namespace UmPayTest;
+
+internal class Demo : BackgroundService
 {
-    internal class Demo : BackgroundService
+    private readonly IPaymentClient _paymentClient;
+    private readonly UmPaySerializer _umPaySerializer;
+    private readonly ILogger<Demo> _logger;
+
+    public Demo(IPaymentClient paymentClient, UmPaySerializer umPaySerializer, ILogger<Demo> logger)
     {
-        private readonly IPaymentClient _paymentClient;
-        private readonly UmPaySerializer _umPaySerializer;
-        private readonly ILogger<Demo> _logger;
+        _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
+        _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        public Demo(IPaymentClient paymentClient, UmPaySerializer umPaySerializer, ILogger<Demo> logger)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await DepoistAsync();
+        //await ExchangeRateAsync();
+    }
+
+    private async Task DepoistAsync()
+    {
+        var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
+        var merchantNo = "MAJA1628579663";
+        var orderType = "1";
+        var orderNo = Guid.NewGuid();
+        var amount = 100;
+        var tradeType = "PAY12";
+        var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
+        var rate = cryptoTradeTypes.Contains(tradeType) ? 7.8m : 1;//TODO:加密需要給rate
+        var tradeDesc = "order123";
+        var depositSettings = new UmPayDepositSettings(
+            apiKey,
+            merchantNo,
+            tradeType,
+            orderType,
+            orderNo,
+            amount,
+            rate,
+            tradeDesc
+            );
+        try
         {
-            _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-            _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            var depositReturn = await _paymentClient.DepositAsync(
+                "tgs.payment.umpay.deposit",
+                100,
+                _umPaySerializer.Serialize(depositSettings));
+            _logger.LogInformation($"Deposit Return:", depositReturn);
         }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        catch (Exception ex)
         {
-            await DepoistAsync();
-            //await ExchangeRateAsync();
+            _logger.LogDebug("{ex.Message}", ex.Message);
         }
+    }
 
-        private async Task DepoistAsync()
-        {
-            var apiKey = "7bdc9a41b4d54ca1f593cddf00f49023";
-            var merchantNo = "MAJA1628579663";
-            var orderType = "1";
-            var orderNo = Guid.NewGuid();
-            var amount = 100;
-            var tradeType = "PAY12";
-            var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
-            var rate = cryptoTradeTypes.Contains(tradeType) ? 7.8m : 1;//TODO:加密需要給rate
-            var tradeDesc = "order123";
-            var depositSettings = new UmPayDepositSettings(
-                apiKey,
-                merchantNo,
-                tradeType,
-                orderType,
-                orderNo,
-                amount,
-                rate,
-                tradeDesc
-                );
-            try
-            {
-                var depositReturn = await _paymentClient.DepositAsync(
-                    "tgs.payment.umpay.deposit",
-                    100,
-                    _umPaySerializer.Serialize(depositSettings));
-                _logger.LogInformation($"Deposit Return:", depositReturn);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex.Message);
-            }
-        }
+#pragma warning disable IDE0051 // 刪除未使用的私用成員
+    private async Task ExchangeRateAsync()
+#pragma warning restore IDE0051 // 刪除未使用的私用成員
+    {
+        var exchangeRateSettings = new UmPayQueryExchangeRateSettings();
+        var queryExchangeRateReturn = await _paymentClient
+            .AskAsync("tgs.payment.umpay.queryexchangerate",
+            _umPaySerializer.Serialize(exchangeRateSettings));
 
-        private async Task ExchangeRateAsync()
-        {
-            var exchangeRateSettings = new UmPayQueryExchangeRateSettings();
-            var queryExchangeRateReturn = await _paymentClient
-                .AskAsync("tgs.payment.umpay.queryexchangerate",
-                _umPaySerializer.Serialize(exchangeRateSettings));
-
-            _logger.LogInformation("ExchangeRate Return:", queryExchangeRateReturn);
-        }
+        _logger.LogInformation("ExchangeRate Return:", queryExchangeRateReturn);
     }
 }

@@ -5,13 +5,13 @@
 replicaCount: 1
 
 image:  
-  repository: harbor.rpgp.cc/tgs/payment-umpay
+  repository: pgtgs/payment-umpay
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 imagePullSecrets:
-  - name: secret-tgs-harbor
+  - name: dockerhub
 nameOverride: "payment-umpay"
 fullnameOverride: "payment-umpay"
 
@@ -21,7 +21,10 @@ callbackBaseUrl: https://dev-payment.rpgp.cc/umpay
 paymentServiceBaseUrl: http://payment-api
 expire: 01:00:00
 
-podAnnotations: {}
+podAnnotations: 
+  prometheus.io/path: /metrics
+  prometheus.io/port: "52325"
+  prometheus.io/scrape: "true"
 
 podSecurityContext: {}
   # fsGroup: 2000
