@@ -4,18 +4,17 @@ using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
-namespace Tgs.Payment.UmPay.Services
+namespace Tgs.Payment.UmPay.Services;
+
+internal class ApproveDepositFormCommandService : ICommandService<ApproveDepositFormCommand>
 {
-    internal class ApproveDepositFormCommandService : ICommandService<ApproveDepositFormCommand>
+    private readonly IPaymentClient _paymentClient;
+
+    public ApproveDepositFormCommandService(IPaymentClient paymentClient)
     {
-        private readonly IPaymentClient _paymentClient;
-
-        public ApproveDepositFormCommandService(IPaymentClient paymentClient)
-        {
-            _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-        }
-
-        public ValueTask ExecuteAsync(ApproveDepositFormCommand command, CancellationToken cancellationToken = default)
-            => _paymentClient.ApproveDepositAsync(command.FormId, command.BrandId, command.ActualAmount);
+        _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
     }
+
+    public ValueTask ExecuteAsync(ApproveDepositFormCommand command, CancellationToken cancellationToken = default)
+        => _paymentClient.ApproveDepositAsync(command.FormId, command.BrandId, command.ActualAmount);
 }

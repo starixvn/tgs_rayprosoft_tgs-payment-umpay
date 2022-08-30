@@ -1,40 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
-namespace Tgs.Payment.UmPay
+namespace Tgs.Payment.UmPay;
+
+public class UmPayHasher
 {
-    public class UmPayHasher
+    private static readonly MD5 _Md5 = MD5.Create();
+    private readonly ILogger<UmPayHasher> _logger;
+
+    public UmPayHasher(ILogger<UmPayHasher> logger)
     {
-        private readonly static MD5 _Md5;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
-        static UmPayHasher()
-        {
-            _Md5 = MD5.Create();
-        }
+    public string ComputeHash(string apiKey, IDictionary<string, object> dict)
+    {
+        var content = string.Join(
+            "",
+            dict.OrderBy(x => x.Key)
+                .Select(p =>
+                {
+                    return p.Key is "sign" or "rate" ? "" : $"{p.Key}{p.Value}";
+                }));
 
-        public string ComputeHash(string apiKey, IDictionary<string, object> dict)
-        {            
-            var content = string.Join(
-                "",
-                dict.OrderBy(x => x.Key)
-                    .Select(p =>
-                    {
-                        if (p.Key == "sign" || p.Key == "rate")
-                            return "";
-                        else
-                            return $"{p.Key}{p.Value}";
-                    }));            
+        _logger.LogTrace("Content: {content}", content);
 
-            var data = Encoding.UTF8.GetBytes(content);
-            var base64 = Convert.ToBase64String(data);
+        var data = Encoding.UTF8.GetBytes(content);
+        var base64 = Convert.ToBase64String(data);
 
-            var fullText = $"{base64}{apiKey}";
-            var hash = _Md5.ComputeHash(Encoding.UTF8.GetBytes(fullText));
+        var fullText = $"{base64}{apiKey}";
 
-            return Convert.ToHexString(hash).ToLower();
-        }
+        _logger.LogTrace("FullText: {fullText}", fullText);
+
+        var hash = _Md5.ComputeHash(Encoding.UTF8.GetBytes(fullText));
+
+        return Convert.ToHexString(hash).ToLower();
     }
 }

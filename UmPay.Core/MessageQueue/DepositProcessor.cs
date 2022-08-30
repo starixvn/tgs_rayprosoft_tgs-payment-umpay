@@ -11,100 +11,96 @@ using Tgs.Payment.Protos;
 using Tgs.Payment.UmPay.Services;
 using TGS.ServiceUtility;
 
-namespace Tgs.Payment.UmPay.MessageQueue
+namespace Tgs.Payment.UmPay.MessageQueue;
+
+internal class DepositProcessor : IMessageProcessor
 {
-    internal class DepositProcessor : IMessageProcessor
+    private readonly UmPaySerializer _umPaySerializer;
+    private readonly UmPayClient _umPayClient;
+    private readonly ICommandService<SendScheduleCommand> _scheduleCommandService;
+    private readonly ILogger<DepositProcessor> _logger;
+    private readonly UmPayOptions _options;
+
+    public DepositProcessor(
+        UmPaySerializer umPaySerializer,
+        UmPayClient umPayClient,
+        IOptions<UmPayOptions> optionsAccessor,
+        ICommandService<SendScheduleCommand> scheduleCommandService,
+        ILogger<DepositProcessor> logger)
     {
-        private readonly UmPaySerializer _umPaySerializer;
-        private readonly UmPayClient _umPayClient;
-        private readonly ICommandService<SendScheduleCommand> _scheduleCommandService;
-        private readonly ILogger<DepositProcessor> _logger;
-        private readonly UmPayOptions _options;
+        _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
+        _umPayClient = umPayClient ?? throw new ArgumentNullException(nameof(umPayClient));
+        _scheduleCommandService = scheduleCommandService ?? throw new ArgumentNullException(nameof(scheduleCommandService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _options = optionsAccessor.Value;
+    }
 
-        public DepositProcessor(
-            UmPaySerializer umPaySerializer,
-            UmPayClient umPayClient,
-            IOptions<UmPayOptions> optionsAccessor,
-            ICommandService<SendScheduleCommand> scheduleCommandService,
-            ILogger<DepositProcessor> logger)
+    public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+    {
+        var request = DepositRequest.Parser.ParseFrom(data);
+        var settings = _umPaySerializer.Deserialize<UmPayDepositSettings>(request.ApplyInfo)!;
+        var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
+
+        var order = new DepositOrder
         {
-            _umPaySerializer = umPaySerializer ?? throw new ArgumentNullException(nameof(umPaySerializer));
-            _umPayClient = umPayClient ?? throw new ArgumentNullException(nameof(umPayClient));
-            _scheduleCommandService = scheduleCommandService ?? throw new ArgumentNullException(nameof(scheduleCommandService));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _options = optionsAccessor.Value;
-        }
+            MerchatNo = settings.MerchantNo,
+            TradeType = settings.TradeType,
+            OrderType = settings.OrderType,
+            //不影響用戶付款時間
+            TimeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString(),
+            //訂單號需純數字
+            OrderNo = new BigInteger(settings.OrderNo.ToByteArray(), isUnsigned: true, isBigEndian: false).ToString(),
+            Amount = decimal.Parse(request.Amount),
+            Rate = cryptoTradeTypes.Contains(settings.TradeType) ? settings.Rate : 1,
+            TradeDesc = settings.TradeDesc,
+            NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback"
+        };
 
-        public async ValueTask<byte[]> HandleAsync(byte[] data, CancellationToken cancellationToken = default)
+        var depositResponse = await _umPayClient
+            .DepositAsync(settings.ApiKey, order)
+            .ConfigureAwait(false);
+
+        var expireTime = _options.Expire;
+        _logger.LogInformation("Expire Time:{expireTime:hh\\:mm\\:ss}", expireTime);
+        var scheduleCommand = new SendScheduleCommand("tgs.payment.umpay.deposit.schedule", settings.OrderNo, DateTime.UtcNow.Add(expireTime));
+
+        await _scheduleCommandService
+            .ExecuteAsync(scheduleCommand, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (depositResponse != null && depositResponse.Code == "1")
         {
-            var request = DepositRequest.Parser.ParseFrom(data);
-            var settings = _umPaySerializer.Deserialize<UmPayDepositSettings>(request.ApplyInfo)!;
-            var cryptoTradeTypes = new string[] { "PAY10", "PAY11", "PAY12" };
+            var applyInfo = new UmPayDepositApplyInfo(settings, depositResponse);
 
-            var order = new DepositOrder
+            var msg = new DepositResponse
             {
-                MerchatNo = settings.MerchantNo,
-                TradeType = settings.TradeType,
-                OrderType = settings.OrderType,
-                //不影響用戶付款時間
-                TimeStamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds().ToString(),
-                //訂單號需純數字
-                OrderNo = new BigInteger(settings.OrderNo.ToByteArray(), isUnsigned: true, isBigEndian: false).ToString(),
-                Amount = decimal.Parse(request.Amount),
-                Rate = cryptoTradeTypes.Contains(settings.TradeType) ? settings.Rate : 1,
-                TradeDesc = settings.TradeDesc,
-                NotifyUrl = $"{_options.CallbackBaseUrl}/deposit/callback"
+                Result = _umPaySerializer.Serialize(applyInfo)
             };
 
-            var depositResponse = await _umPayClient
-                .DepositAsync(settings.MerchantNo, settings.ApiKey, order)
-                .ConfigureAwait(false);
-
-            var expireTime = _options.Expire;
-            _logger.LogInformation($"Expire Time:{expireTime:hh\\:mm\\:ss}");
-            var scheduleCommand = new SendScheduleCommand("tgs.payment.umpay.deposit.schedule", settings.OrderNo, DateTime.UtcNow.Add(expireTime));
-
-            await _scheduleCommandService
-                .ExecuteAsync(scheduleCommand)
-                .ConfigureAwait(false);
-
-            if (depositResponse != null && depositResponse.Code == "1")
+            return msg.ToByteArray();
+        }
+        else
+        {
+            var errorMsg = string.Empty;
+            if (depositResponse != null)
             {
-                var applyInfo = new UmPayDepositApplyInfo(settings, depositResponse);
-
-                var msg = new DepositResponse
-                {
-                    Result = _umPaySerializer.Serialize(applyInfo)
-                };
-
-                return msg.ToByteArray();
+                errorMsg = depositResponse.Msg ?? "Request Fail";
             }
-            else
+
+            var response = new UmPayDepositFailResponse
             {
-                var errorMsg = string.Empty;
-                if (depositResponse != null)
-                {
-                    if (depositResponse.Msg != null)
-                        errorMsg = depositResponse.Msg;
-                    else
-                        errorMsg = "Request Fail";
-                }
+                Code = depositResponse!.Code,
+                Msg = errorMsg
+            };
 
-                var response = new UmPayDepositFailResponse
-                {
-                    Code = depositResponse!.Code,
-                    Msg = errorMsg
-                };
+            var applyInfo = new UmPayDepositApplyInfo(settings, response);
 
-                var applyInfo = new UmPayDepositApplyInfo(settings, response);
+            var msg = new DepositResponse
+            {
+                Result = _umPaySerializer.Serialize(applyInfo)
+            };
 
-                var msg = new DepositResponse
-                {
-                    Result = _umPaySerializer.Serialize(applyInfo)
-                };
-
-                return msg.ToByteArray();
-            }
+            return msg.ToByteArray();
         }
     }
 }

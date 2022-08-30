@@ -1,4 +1,3 @@
-﻿namespace Tgs.Payment.UmPay
-{
-    public record UmPayQueryExchangeRateSettings();
-}
+﻿namespace Tgs.Payment.UmPay;
+
+public record UmPayQueryExchangeRateSettings();
